@@ -1,0 +1,645 @@
+// Etsy AI Autopilot — data model
+// See docs/ARCHITECTURE.md for how these tables map to agents and pipelines.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// Shop & Etsy connection
+// =============================================================================
+
+model Shop {
+  id            String   @id @default(uuid())
+  etsyShopId    String?  @unique @map("etsy_shop_id")
+  shopName      String?  @map("shop_name")
+  currencyCode  String   @default("USD") @map("currency_code")
+  timezone      String   @default("Europe/Istanbul")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  connections    EtsyConnection[]
+  products       Product[]
+  orders         EtsyOrder[]
+  dailyMetrics   DailyMetric[]
+  alerts         Alert[]
+  autopilotState AutopilotState?
+  auditLogs      AuditLog[]
+  seasonalEvents SeasonalEvent[]
+  webhookEvents  WebhookEvent[]
+
+  @@map("shops")
+}
+
+model EtsyConnection {
+  id                String   @id @default(uuid())
+  shopId            String   @map("shop_id")
+  shop              Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  accessTokenEnc    String   @map("access_token_enc")
+  refreshTokenEnc   String   @map("refresh_token_enc")
+  scopes            String[]
+  expiresAt         DateTime @map("expires_at")
+  lastRefreshedAt   DateTime? @map("last_refreshed_at")
+  lastVerifiedAt    DateTime? @map("last_verified_at")
+  isActive          Boolean  @default(true) @map("is_active")
+  revokedAt         DateTime? @map("revoked_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([shopId])
+  @@map("etsy_connections")
+}
+
+// =============================================================================
+// Products
+// =============================================================================
+
+enum ProductStatus {
+  RESEARCHING
+  DRAFT
+  IN_PRODUCTION
+  IN_QA
+  QA_FAILED
+  IP_REJECTED
+  READY_TO_PUBLISH
+  PUBLISHED
+  OPTIMIZING
+  DEACTIVATED
+  ARCHIVED
+  CANCELLED
+}
+
+model Product {
+  id             String        @id @default(uuid())
+  shopId         String        @map("shop_id")
+  shop           Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  slug           String        @unique
+  title          String
+  category       String
+  productType    String        @map("product_type") // e.g. "wedding_printable_bundle"
+  status         ProductStatus @default(RESEARCHING)
+  opportunityId  String?       @map("opportunity_id")
+  opportunity    Opportunity?  @relation(fields: [opportunityId], references: [id])
+  designFamily   String?       @map("design_family") // groups variations/bundles together
+  parentProductId String?      @map("parent_product_id")
+  parentProduct  Product?      @relation("ProductVariations", fields: [parentProductId], references: [id])
+  variations     Product[]     @relation("ProductVariations")
+  currentVersionId String?     @unique @map("current_version_id")
+  currentVersion ProductVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  versions       ProductVersion[] @relation("AllVersions")
+  listings       Listing[]
+  qaReports      QaReport[]
+  ipChecks       IpCheck[]
+  metrics        ProductMetric[]
+  priceChanges   PriceChange[]
+  experiments    Experiment[]
+
+  @@index([shopId, status])
+  @@index([designFamily])
+  @@map("products")
+}
+
+model ProductVersion {
+  id              String   @id @default(uuid())
+  productId       String   @map("product_id")
+  product         Product  @relation("AllVersions", fields: [productId], references: [id], onDelete: Cascade)
+  versionNumber   Int      @map("version_number")
+  sourceDir       String   @map("source_dir") // storage path to product/ package root
+  customerFiles   Json     @map("customer_files") // { PDF: [...], PNG: [...], SVG: [...], ZIP: [...] }
+  listingImages   Json     @map("listing_images") // ordered list of image paths
+  mockups         Json     @map("mockups")
+  metadataJson    Json     @map("metadata_json")
+  seoJson         Json?    @map("seo_json")
+  qaReportJson    Json?    @map("qa_report_json")
+  licenseText     String?  @map("license_text")
+  designPromptVersion String? @map("design_prompt_version")
+  generationCost  Decimal  @default(0) @db.Decimal(10, 4) @map("generation_cost")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  currentFor      Product? @relation("CurrentVersion")
+  qaReports       QaReport[]
+  ipChecks        IpCheck[]
+  listings        Listing[]
+  generationCosts GenerationCost[]
+
+  @@unique([productId, versionNumber])
+  @@map("product_versions")
+}
+
+// =============================================================================
+// Research / opportunities / keywords
+// =============================================================================
+
+model ProductResearch {
+  id           String   @id @default(uuid())
+  source       String   // "google_trends" | "pinterest" | "etsy_own_shop" | "manual_csv" | "manual_admin" | "seasonal_calendar"
+  keyword      String
+  rawData      Json     @map("raw_data")
+  collectedAt  DateTime @default(now()) @map("collected_at")
+
+  keywords     Keyword[]
+
+  @@index([keyword])
+  @@map("product_research")
+}
+
+model Keyword {
+  id              String   @id @default(uuid())
+  keyword         String   @unique
+  researchId      String?  @map("research_id")
+  research        ProductResearch? @relation(fields: [researchId], references: [id])
+  demandScore     Int?     @map("demand_score")
+  competitionScore Int?    @map("competition_score")
+  searchVolumeHint String? @map("search_volume_hint")
+  seasonalPeakMonths Int[] @map("seasonal_peak_months")
+  lastEvaluatedAt DateTime? @map("last_evaluated_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  opportunities   Opportunity[]
+
+  @@map("keywords")
+}
+
+model Opportunity {
+  id                    String   @id @default(uuid())
+  keywordId             String?  @map("keyword_id")
+  keyword               Keyword? @relation(fields: [keywordId], references: [id])
+  title                 String
+  niche                 String
+  productType           String   @map("product_type")
+  demandScore           Int      @map("demand_score")
+  competitionScore      Int      @map("competition_score")
+  marginScore           Int      @map("margin_score")
+  automationSuitability Int      @map("automation_suitability")
+  seasonalityScore      Int      @map("seasonality_score")
+  ipRiskScore           Int      @map("ip_risk_score")
+  opportunityScore      Int      @map("opportunity_score")
+  reasoning             String?
+  status                String   @default("NEW") // NEW | SELECTED | REJECTED | PRODUCED
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  products              Product[]
+
+  @@index([status, opportunityScore])
+  @@map("opportunities")
+}
+
+// =============================================================================
+// Agent execution & decisions (Store Director's brain trail)
+// =============================================================================
+
+enum AgentRunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  DEAD_LETTER
+}
+
+model AgentRun {
+  id           String         @id @default(uuid())
+  agentName    String         @map("agent_name")
+  jobName      String         @map("job_name")
+  status       AgentRunStatus @default(QUEUED)
+  input        Json?
+  output       Json?
+  error        String?
+  attempt      Int            @default(1)
+  startedAt    DateTime?      @map("started_at")
+  finishedAt   DateTime?      @map("finished_at")
+  durationMs   Int?           @map("duration_ms")
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  decisions    AgentDecision[]
+  generationCosts GenerationCost[]
+
+  @@index([agentName, status])
+  @@map("agent_runs")
+}
+
+model AgentDecision {
+  id            String   @id @default(uuid())
+  agentRunId    String?  @map("agent_run_id")
+  agentRun      AgentRun? @relation(fields: [agentRunId], references: [id])
+  agentName     String   @map("agent_name")
+  entityType    String   @map("entity_type") // "product" | "listing" | "opportunity" | "shop"
+  entityId      String?  @map("entity_id")
+  action        String
+  reason        String
+  dataUsed      Json     @map("data_used")
+  confidenceScore Float  @map("confidence_score")
+  result        String?  // outcome once known
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([agentName, createdAt])
+  @@map("agent_decisions")
+}
+
+// =============================================================================
+// QA & IP / policy guard
+// =============================================================================
+
+model QaReport {
+  id               String   @id @default(uuid())
+  productId        String   @map("product_id")
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVersionId String   @map("product_version_id")
+  productVersion   ProductVersion @relation(fields: [productVersionId], references: [id], onDelete: Cascade)
+  attempt          Int      @default(1)
+  designScore      Int      @map("design_score")
+  technicalScore   Int      @map("technical_score")
+  seoScore         Int      @map("seo_score")
+  originalityScore Int      @map("originality_score")
+  policySafetyScore Int     @map("policy_safety_score")
+  overallScore     Int      @map("overall_score")
+  passed           Boolean
+  issues           Json     // list of { code, severity, message, location }
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@map("qa_reports")
+}
+
+enum IpRiskLevel {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model IpCheck {
+  id               String      @id @default(uuid())
+  productId        String      @map("product_id")
+  product          Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVersionId String      @map("product_version_id")
+  productVersion   ProductVersion @relation(fields: [productVersionId], references: [id], onDelete: Cascade)
+  riskScore        Int         @map("risk_score") // 0-100
+  riskLevel        IpRiskLevel @map("risk_level")
+  matchedTerms     Json        @map("matched_terms") // [{term, category, matchType, confidence}]
+  decision         String      // "APPROVED" | "REJECTED" | "NEEDS_REVIEW"
+  rulesetVersion   String      @map("ruleset_version")
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@map("ip_checks")
+}
+
+// =============================================================================
+// Listings
+// =============================================================================
+
+enum ListingState {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  SOLD_OUT
+  EXPIRED
+  REJECTED_BY_ETSY
+}
+
+model Listing {
+  id               String       @id @default(uuid())
+  productId        String       @map("product_id")
+  product          Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productVersionId String       @map("product_version_id")
+  productVersion   ProductVersion @relation(fields: [productVersionId], references: [id])
+  etsyListingId    String?      @unique @map("etsy_listing_id")
+  state            ListingState @default(DRAFT)
+  title            String
+  description      String       @db.Text
+  tags             String[]
+  priceAmount      Decimal      @db.Decimal(10, 2) @map("price_amount")
+  currencyCode     String       @default("USD") @map("currency_code")
+  taxonomyId       Int?         @map("taxonomy_id")
+  attributes       Json?
+  whoMade          String       @default("i_did") @map("who_made")
+  whenMade         String       @default("made_to_order") @map("when_made")
+  isDigital        Boolean      @default(true) @map("is_digital")
+  publishedAt      DateTime?    @map("published_at")
+  deactivatedAt    DateTime?    @map("deactivated_at")
+  lastSyncedAt     DateTime?    @map("last_synced_at")
+  aiDisclosure     String?      @map("ai_disclosure")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  assets           ListingAsset[]
+  digitalFiles     DigitalFile[]
+  orderItems       EtsyOrderItem[]
+  metrics          ProductMetric[]
+  priceChanges     PriceChange[]
+  experiments      Experiment[]
+
+  @@index([productId])
+  @@index([state])
+  @@map("listings")
+}
+
+model ListingAsset {
+  id             String   @id @default(uuid())
+  listingId      String   @map("listing_id")
+  listing        Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  etsyImageId    String?  @map("etsy_image_id")
+  rank           Int
+  role           String   // "cover" | "mockup" | "contents" | "sizes" | "instant_download" | "how_it_works" | "printing_guide" | "usage_example" | "bundle_overview" | "info"
+  storagePath    String   @map("storage_path")
+  uploadedAt     DateTime? @map("uploaded_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([listingId])
+  @@map("listing_assets")
+}
+
+model DigitalFile {
+  id           String   @id @default(uuid())
+  listingId    String   @map("listing_id")
+  listing      Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  etsyFileId   String?  @map("etsy_file_id")
+  rank         Int
+  filename     String
+  storagePath  String   @map("storage_path")
+  fileType     String   @map("file_type") // PDF | PNG | SVG | ZIP
+  sizeBytes    Int      @map("size_bytes")
+  uploadedAt   DateTime? @map("uploaded_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([listingId])
+  @@map("digital_files")
+}
+
+// =============================================================================
+// Orders
+// =============================================================================
+
+model EtsyOrder {
+  id             String   @id @default(uuid())
+  shopId         String   @map("shop_id")
+  shop           Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  etsyReceiptId  String   @unique @map("etsy_receipt_id")
+  buyerUserId    String?  @map("buyer_user_id")
+  status         String   // paid | canceled | shipped | delivered (per Etsy status)
+  grandTotal     Decimal  @db.Decimal(10, 2) @map("grand_total")
+  currencyCode   String   @map("currency_code")
+  isRefunded     Boolean  @default(false) @map("is_refunded")
+  paidAt         DateTime? @map("paid_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  items          EtsyOrderItem[]
+
+  @@index([shopId])
+  @@map("etsy_orders")
+}
+
+model EtsyOrderItem {
+  id             String   @id @default(uuid())
+  orderId        String   @map("order_id")
+  order          EtsyOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listingId      String?  @map("listing_id")
+  listing        Listing? @relation(fields: [listingId], references: [id])
+  etsyTransactionId String @unique @map("etsy_transaction_id")
+  quantity       Int      @default(1)
+  price          Decimal  @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("etsy_order_items")
+}
+
+// =============================================================================
+// Webhooks
+// =============================================================================
+
+model WebhookEvent {
+  id           String   @id @default(uuid())
+  shopId       String?  @map("shop_id")
+  shop         Shop?    @relation(fields: [shopId], references: [id])
+  provider     String   @default("etsy")
+  eventType    String   @map("event_type")
+  externalId   String   @map("external_id") // idempotency key from provider
+  payload      Json
+  status       String   @default("RECEIVED") // RECEIVED | PROCESSED | FAILED | IGNORED_DUPLICATE
+  receivedAt   DateTime @default(now()) @map("received_at")
+  processedAt  DateTime? @map("processed_at")
+  error        String?
+
+  @@unique([provider, externalId])
+  @@map("webhook_events")
+}
+
+// =============================================================================
+// Analytics & finance
+// =============================================================================
+
+model DailyMetric {
+  id                String   @id @default(uuid())
+  shopId            String   @map("shop_id")
+  shop              Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  date              DateTime @db.Date
+  grossRevenue      Decimal  @default(0) @db.Decimal(10, 2) @map("gross_revenue")
+  estimatedEtsyFees Decimal  @default(0) @db.Decimal(10, 2) @map("estimated_etsy_fees")
+  aiCosts           Decimal  @default(0) @db.Decimal(10, 4) @map("ai_costs")
+  estimatedTaxes    Decimal  @default(0) @db.Decimal(10, 2) @map("estimated_taxes")
+  estimatedNet      Decimal  @default(0) @db.Decimal(10, 2) @map("estimated_net")
+  orders            Int      @default(0)
+  visitors          Int?
+  views             Int?
+  favorites         Int?
+  productsGenerated Int      @default(0) @map("products_generated")
+  productsPublished Int      @default(0) @map("products_published")
+  productsRejected  Int      @default(0) @map("products_rejected")
+  productsOptimized Int      @default(0) @map("products_optimized")
+  productsDeactivated Int    @default(0) @map("products_deactivated")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@unique([shopId, date])
+  @@map("daily_metrics")
+}
+
+model ProductMetric {
+  id             String   @id @default(uuid())
+  productId      String   @map("product_id")
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  listingId      String?  @map("listing_id")
+  listing        Listing? @relation(fields: [listingId], references: [id])
+  date           DateTime @db.Date
+  views          Int?
+  visits         Int?
+  favorites      Int?
+  sales          Int      @default(0)
+  revenue        Decimal  @default(0) @db.Decimal(10, 2)
+  refunds        Decimal  @default(0) @db.Decimal(10, 2)
+  conversionRate Float?   @map("conversion_rate")
+  revenuePerVisitor Float? @map("revenue_per_visitor")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@unique([productId, date])
+  @@index([listingId, date])
+  @@map("product_metrics")
+}
+
+model PriceChange {
+  id          String   @id @default(uuid())
+  productId   String   @map("product_id")
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  listingId   String   @map("listing_id")
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  oldPrice    Decimal  @db.Decimal(10, 2) @map("old_price")
+  newPrice    Decimal  @db.Decimal(10, 2) @map("new_price")
+  reason      String
+  triggeredBy String   @map("triggered_by") // agent name or "manual"
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("price_changes")
+}
+
+enum ExperimentStatus {
+  RUNNING
+  COMPLETED
+  ABORTED
+}
+
+model Experiment {
+  id            String   @id @default(uuid())
+  productId     String   @map("product_id")
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  listingId     String   @map("listing_id")
+  listing       Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  type          String   // "sequential_price_test"
+  hypothesis    String
+  steps         Json     // ordered list of { value, startedAt, endedAt, metrics }
+  status        ExperimentStatus @default(RUNNING)
+  conclusion    String?
+  startedAt     DateTime @default(now()) @map("started_at")
+  endedAt       DateTime? @map("ended_at")
+
+  @@map("experiments")
+}
+
+model GenerationCost {
+  id               String   @id @default(uuid())
+  agentRunId       String?  @map("agent_run_id")
+  agentRun         AgentRun? @relation(fields: [agentRunId], references: [id])
+  productVersionId String?  @map("product_version_id")
+  productVersion   ProductVersion? @relation(fields: [productVersionId], references: [id])
+  provider         String   // "openai" | "gemini" | ...
+  model            String
+  operation        String   // "text_generation" | "image_generation"
+  inputTokens      Int?     @map("input_tokens")
+  outputTokens     Int?     @map("output_tokens")
+  imagesGenerated  Int?     @map("images_generated")
+  costUsd          Decimal  @db.Decimal(10, 5) @map("cost_usd")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("generation_costs")
+}
+
+// =============================================================================
+// Alerts / automation / audit
+// =============================================================================
+
+enum AlertPriority {
+  P0
+  P1
+  P2
+}
+
+enum AlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+model Alert {
+  id         String        @id @default(uuid())
+  shopId     String?       @map("shop_id")
+  shop       Shop?         @relation(fields: [shopId], references: [id])
+  priority   AlertPriority
+  category   String        // "etsy_auth" | "shop_suspended" | "payment" | "policy" | "publish_failure" | "webhook_down" | "generation_error" | "customer_attention" | "refund" | "performance"
+  title      String
+  message    String
+  context    Json?
+  status     AlertStatus   @default(OPEN)
+  notifiedAt DateTime?     @map("notified_at")
+  resolvedAt DateTime?     @map("resolved_at")
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@index([status, priority])
+  @@map("alerts")
+}
+
+model AutomationRun {
+  id          String   @id @default(uuid())
+  name        String   // "daily_store_health" | "weekly_winning_products" | ...
+  cadence     String   // "daily" | "weekly" | "monthly"
+  status      String   @default("RUNNING") // RUNNING | SUCCEEDED | FAILED
+  summary     Json?
+  startedAt   DateTime @default(now()) @map("started_at")
+  finishedAt  DateTime? @map("finished_at")
+
+  @@index([name, startedAt])
+  @@map("automation_runs")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  shopId     String?  @map("shop_id")
+  shop       Shop?    @relation(fields: [shopId], references: [id])
+  actor      String   // agent name or "human" or "system"
+  action     String   // "price_change" | "listing_published" | "listing_deactivated" | ...
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  before     Json?
+  after      Json?
+  reason     String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SeasonalEvent {
+  id           String   @id @default(uuid())
+  shopId       String?  @map("shop_id")
+  shop         Shop?    @relation(fields: [shopId], references: [id])
+  name         String   // "Valentine's Day"
+  eventDate    DateTime @db.Date @map("event_date")
+  leadTimeDays Int      @map("lead_time_days")
+  category     String   // "wedding" | "holiday" | "back_to_school" | ...
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("seasonal_events")
+}
+
+// Single-row table (per shop) holding the kill switch and live autopilot config
+model AutopilotState {
+  id                   String   @id @default(uuid())
+  shopId               String   @unique @map("shop_id")
+  shop                 Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  isPaused             Boolean  @default(false) @map("is_paused")
+  pausedAt             DateTime? @map("paused_at")
+  pausedReason         String?  @map("paused_reason")
+  autoPublish          Boolean  @default(false) @map("auto_publish")
+  dryRun               Boolean  @default(true) @map("dry_run")
+  maxProductsPerDay    Int      @default(3) @map("max_products_per_day")
+  maxProductsPerWeek   Int      @default(10) @map("max_products_per_week")
+  qaMinScore           Int      @default(90) @map("qa_min_score")
+  ipRiskRejectThreshold Int     @default(40) @map("ip_risk_reject_threshold")
+  minPrice             Decimal  @default(3.00) @db.Decimal(10, 2) @map("min_price")
+  maxPrice             Decimal  @default(45.00) @db.Decimal(10, 2) @map("max_price")
+  maxDailyPriceChange  Int      @default(1) @map("max_daily_price_change")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@map("autopilot_state")
+}

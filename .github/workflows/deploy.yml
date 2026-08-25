@@ -1,5 +1,15 @@
 name: Deploy
 
+# PARKED — not the active deploy path. Every attempt to run this (across a
+# private repo, then a public repo, default Actions permissions, and a
+# raised spending limit) failed with a GitHub Actions runner never getting
+# assigned (job created, runner_id 0, no logs, completed in seconds — a
+# GitHub-side account/runner-pool issue, not a workflow bug). Production
+# now deploys via scripts/deploy-vps.sh (source build directly on the
+# target VPS) — see docs/PRODUCTION_DEPLOY.md. Left here, unused, in case
+# the underlying GitHub Actions issue gets resolved later and a GHCR-based
+# deploy becomes worth reviving.
+#
 # Builds and pushes production images to GHCR. Manual only (workflow_dispatch)
 # — this repo has no automatic production deploy step; a human triggers this,
 # then applies docker-compose.prod.yml on the target host themselves (see

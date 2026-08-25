@@ -1,8 +1,18 @@
 # Production deployment — Etsy AI Autopilot / Form & Fern
 
-Deployed as an **isolated** Docker Compose project on an existing Hostinger
-VPS that also runs an unrelated n8n stack. Nothing here touches n8n's
-containers, database, Redis, volumes, or environment.
+Deployed as an **isolated** Docker Compose project, built directly from
+source **on** an existing Hostinger VPS that also runs an unrelated n8n
+stack. Nothing here touches n8n's containers, database, Redis, volumes, or
+environment.
+
+**Why source build on the VPS instead of GHCR images:** the GHCR path
+(`.github/workflows/deploy.yml`) was tried first and is left in the repo,
+parked. Every attempt — on a private repo, then a public repo, with
+default Actions permissions, and with a raised GitHub spending limit —
+failed identically: a job gets created but no GitHub-hosted runner is ever
+assigned to it (`runner_id: 0`, no logs, fails in seconds). That's a
+GitHub-side account/runner-pool issue, not something fixable from this
+repo. Building on the VPS itself sidesteps GitHub Actions entirely.
 
 ## Architecture
 
@@ -21,84 +31,72 @@ Docker network "n8n_default" (external, pre-existing — Traefik's network):
 - **postgres** and **redis** have no published ports and are not on
   `n8n_default` — unreachable from the internet or from the n8n stack.
 - **worker** has no published ports, no Traefik labels, and is only on
-  `etsy_internal` — never internet-reachable, matching the requirement that
-  the autopilot's background worker never opens a public port.
-- **api** and **dashboard** are the only two services on `n8n_default`, and
-  only because that's where the shared Traefik lives to route HTTPS to them.
+  `etsy_internal` — never internet-reachable.
+- **api** and **dashboard** are the only two services on `n8n_default`,
+  routed through the existing shared Traefik via labels instead of new
+  host ports.
 - Compose project name: `etsy-autopilot` (separate from `n8n` and
   `studyoafg`). Separate named volumes: `etsy_postgres_data`,
   `etsy_redis_data`, `etsy_storage_data`.
-- `mem_limit`/`cpus` are set on every service — this VPS is a single-core,
-  4GB box already running n8n + Traefik + a static site. Limits keep a
-  runaway container from starving the existing workloads. If the box feels
-  tight in practice, scaling the VPS plan is the fix, not raising these.
+- `mem_limit`/`cpus` are set on every runtime service — this VPS is a
+  single-core, 4GB box already running n8n + Traefik + a static site.
 
-## Images
+## Deploy
 
-`docker-compose.prod.yml` has no `build:` sections — the VPS pulls
-pre-built images from GHCR:
+Everything is automated by `scripts/deploy-vps.sh`, which must be run **via
+SSH on the VPS itself** (`srv1611752.hstgr.cloud`) — it needs real shell
+access nothing else in this setup has:
 
-- `ghcr.io/akifyapayzeka/etsymagazam-api`
-- `ghcr.io/akifyapayzeka/etsymagazam-worker`
-- `ghcr.io/akifyapayzeka/etsymagazam-dashboard`
+```bash
+ssh <your-user>@srv1611752.hstgr.cloud
+sudo mkdir -p /opt/etsy-autopilot && sudo chown "$(id -u):$(id -g)" /opt/etsy-autopilot
+git clone --branch main https://github.com/akifyapayzeka/etsymagazam.git /opt/etsy-autopilot
+cd /opt/etsy-autopilot
+./scripts/deploy-vps.sh
+```
 
-Built by `.github/workflows/deploy.yml` (manual `workflow_dispatch` only —
-this repo has no automatic deploy-on-merge). The dashboard image bakes in
-`NEXT_PUBLIC_API_BASE_URL` at **build** time (Next.js client-side env vars
-are compiled in, not read at runtime) — the workflow's
-`dashboard_api_base_url` input must exactly match the real production API
-URL (`https://etsy-api.studyoafg.com`).
+The script, in order:
+1. Checks RAM/swap; adds a 2GB swapfile only if none exists and RAM < 6GB.
+2. Clones/pulls this **public** repo — no GitHub token needed.
+3. Generates `POSTGRES_PASSWORD`, `ENCRYPTION_KEY`, `SESSION_SECRET`
+   straight into `/opt/etsy-autopilot/.env` if they're not already there
+   (internal-only secrets, not Etsy credentials — safe to auto-generate;
+   they never leave the VPS, never pass through chat or this repo).
+4. Stops with clear instructions if `ETSY_API_KEYSTRING`,
+   `ETSY_SHARED_SECRET`, `ADMIN_EMAIL`, or `ADMIN_PASSWORD_HASH` are still
+   missing from `.env` — **you fill these in by hand, on the VPS, via
+   `nano /opt/etsy-autopilot/.env`** — see the secrets table below.
+5. Builds `api`, `worker`, `dashboard` **one at a time** (never parallel —
+   this box is 1 CPU/4GB, shared with n8n).
+6. Runs the DB migration, then starts the full stack.
 
-**One-time manual step after the first push:** GHCR packages default to
-**private** even in a public repo. Go to the repo's GitHub page → Packages
-→ each of the 3 `etsymagazam-*` packages → Package settings → change
-visibility to Public (or connect a registry credential to the VPS instead,
-if you'd rather keep them private — the Hostinger Docker Manager deploy
-flow used here has no login step, so public is the simpler default for
-non-sensitive application images with no secrets baked in).
+Re-running the script is safe (it won't regenerate secrets that already
+exist, and Docker Compose reconciles the running state).
 
-## Environment variables
+## Secrets — what goes in `/opt/etsy-autopilot/.env`, and who enters it
 
-Set on the Hostinger side via **hPanel → VPS → Docker Manager →
-`etsy-autopilot` project → Environment**, never committed to this repo.
-
-### Secrets — you enter these yourself, never paste them in chat or commit them
-
-| Variable | What it is | How to get it |
+| Variable | Who sets it | Notes |
 |---|---|---|
-| `ETSY_API_KEYSTRING` | Etsy Seller App keystring | Etsy Developer Portal, your app's Keystring |
-| `ETSY_SHARED_SECRET` | Etsy Seller App shared secret (the one you just rotated) | Etsy Developer Portal, your app's Shared Secret |
-| `ETSY_WEBHOOK_SIGNING_SECRET` | Only if you set up Etsy webhooks | Etsy Developer Portal webhook config |
-| `ADMIN_EMAIL` | Your dashboard login email | Pick one |
-| `ADMIN_PASSWORD_HASH` | bcrypt hash of your dashboard login password | Run **on your own machine**, never here: `pnpm --filter @etsymagazam/api run hash-password -- "your-password"` — paste only the resulting hash, never the plaintext password |
+| `POSTGRES_PASSWORD` | `deploy-vps.sh`, automatically | Internal DB password (Postgres is not internet-reachable) |
+| `ENCRYPTION_KEY` | `deploy-vps.sh`, automatically | 32-byte base64 key encrypting OAuth tokens at rest |
+| `SESSION_SECRET` | `deploy-vps.sh`, automatically | Signs dashboard session cookies |
+| `ETSY_API_KEYSTRING` | **You, by hand** | Etsy Developer Portal, your app's Keystring |
+| `ETSY_SHARED_SECRET` | **You, by hand** | Etsy Developer Portal, your app's Shared Secret (the one you rotated) |
+| `ETSY_WEBHOOK_SIGNING_SECRET` | **You, by hand** (optional) | Only if you set up Etsy webhooks |
+| `ADMIN_EMAIL` | **You, by hand** | Your dashboard login email |
+| `ADMIN_PASSWORD_HASH` | **You, by hand** | bcrypt hash of your dashboard login password — generate it **on your own machine**, never on the VPS or in chat: `pnpm --filter @etsymagazam/api run hash-password -- "your-password"`, then paste only the resulting hash |
 
-### Internal secrets — safe for me to generate, not Etsy credentials
-
-| Variable | What it is |
-|---|---|
-| `POSTGRES_PASSWORD` | Internal DB password (Postgres is not internet-reachable) |
-| `ENCRYPTION_KEY` | 32-byte base64 key encrypting OAuth tokens at rest (`openssl rand -base64 32`) |
-| `SESSION_SECRET` | Signs dashboard session cookies (`openssl rand -base64 48`) |
-
-### Non-secret config (already wired into `docker-compose.prod.yml`)
-
-`API_BASE_URL`, `DASHBOARD_BASE_URL`, `ETSY_OAUTH_REDIRECT_URI`,
-`ETSY_WEBHOOK_URL`, `BRAND_DISPLAY_NAME`, `AUTO_PUBLISH=false`,
-`DRY_RUN=true` are hardcoded in the compose file's `environment:` block —
-no need to set these separately.
+None of these are ever written to this repository, a commit, a log, or
+this chat.
 
 ### Autopilot pause state
 
 `AutopilotState.isPaused` is a **database row**, not an environment
 variable — it is set to `true` automatically the first time OAuth connects
 successfully (see `apps/api/src/routes/etsy-oauth.ts`). Flip it from the
-dashboard's Autopilot settings page when you're ready to unpause; there is
-no env var for this.
+dashboard's Autopilot settings page when ready to unpause.
 
-## DNS
-
-Two new A/AAAA records on `studyoafg.com`, added without touching any
-existing record:
+## DNS (already done)
 
 | Type | Name | Value |
 |---|---|---|
@@ -107,24 +105,21 @@ existing record:
 | A | `etsy-admin` | `72.61.179.151` |
 | AAAA | `etsy-admin` | `2a02:4780:41:b854::1` |
 
-## Deploy steps
+## Verify
 
-1. Trigger `.github/workflows/deploy.yml` (`workflow_dispatch`) to build and
-   push the 3 images to GHCR.
-2. Make the 3 GHCR packages public (see above, one-time).
-3. Fill in the secrets above via hPanel's Docker Manager environment editor
-   for the `etsy-autopilot` project.
-4. Deploy/redeploy the `etsy-autopilot` Docker Compose project on the VPS
-   (Hostinger's Docker Manager, pointed at `docker-compose.prod.yml`).
-5. Verify: `https://etsy-api.studyoafg.com/health` and
-   `https://etsy-admin.studyoafg.com` both resolve over HTTPS and return a
-   healthy response. TLS is issued automatically by the existing shared
-   Traefik (`mytlschallenge` resolver) once DNS has propagated — this can
-   take a few minutes after the DNS records are added.
-6. Log into the dashboard, go to Settings, and use "Connect Etsy" to start
-   OAuth (`GET /api/etsy/oauth/start`, behind dashboard login) — do this
-   only after every secret above is filled in and the API's `/health`
-   endpoint is green.
+```bash
+curl -sS https://etsy-api.studyoafg.com/health
+curl -sSI https://etsy-admin.studyoafg.com
+```
+
+Both must return a healthy response over real HTTPS before starting OAuth.
+TLS is issued automatically by the existing shared Traefik
+(`mytlschallenge` resolver) — can take a couple of minutes after first
+start.
+
+Then: log into the dashboard, go to Settings, and use "Connect Etsy" to
+start OAuth (`GET /api/etsy/oauth/start`, behind dashboard login) — only
+after every secret above is filled in and `/health` is green.
 
 ## What this deploy deliberately does NOT do
 
@@ -135,3 +130,4 @@ existing record:
   from the dashboard after OAuth is verified end-to-end.
 - Does not modify, restart, or resource-limit the existing `n8n` or
   `studyoafg` Docker Compose projects on the same VPS.
+- Does not use GitHub Actions, GHCR, or any paid GitHub feature.

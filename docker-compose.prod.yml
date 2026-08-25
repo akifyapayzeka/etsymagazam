@@ -1,8 +1,9 @@
 # Production deployment — Etsy AI Autopilot / Form & Fern
 #
-# Deployed as an isolated Hostinger VPS "Docker Compose project" (project
-# name: etsy-autopilot) on a VPS that ALSO runs an unrelated n8n stack. This
-# file is written to never touch that other stack:
+# Deployed as an isolated Docker Compose project (project name:
+# etsy-autopilot) directly on an existing Hostinger VPS that ALSO runs an
+# unrelated n8n stack. This file is written to never touch that other
+# stack:
 #   - Own Postgres, own Redis, own persistent volumes, own internal network
 #     (etsy_internal) — postgres/redis/worker are NEVER published to the
 #     host and are unreachable from outside this compose project.
@@ -11,17 +12,23 @@
 #     (already running as part of the `n8n` project) lives. We route through
 #     that existing Traefik via labels instead of binding our own to
 #     host ports 80/443, which are already owned by it.
-#   - Images are pre-built and pushed to GHCR by
-#     .github/workflows/deploy.yml — this file intentionally has no `build:`
-#     sections, since a VPS-side "docker compose up" has no access to this
-#     repo's build context.
 #
-# Requires the external resources below to exist before first deploy:
-#   docker network create n8n_default   # already exists (created by the n8n project)
+# Images are built directly on the VPS from this repo's source (no GHCR,
+# no GitHub Actions — see scripts/deploy-vps.sh, which builds api, worker,
+# and dashboard ONE AT A TIME to stay within the VPS's 1 CPU / 4GB budget
+# alongside the already-running n8n stack).
 #
-# All secrets are supplied via the Hostinger project's environment store
-# (hPanel -> VPS -> Docker Manager -> etsy-autopilot -> Environment), never
-# committed here. See docs/PRODUCTION_DEPLOY.md for the full variable list.
+# Run from the repo root on the VPS (e.g. /opt/etsy-autopilot):
+#   docker compose -p etsy-autopilot -f docker-compose.prod.yml build api
+#   docker compose -p etsy-autopilot -f docker-compose.prod.yml build worker
+#   docker compose -p etsy-autopilot -f docker-compose.prod.yml build dashboard
+#   docker compose -p etsy-autopilot -f docker-compose.prod.yml run --rm migrate
+#   docker compose -p etsy-autopilot -f docker-compose.prod.yml up -d
+#
+# All secrets are read from a `.env` file that lives ONLY on the VPS
+# (/opt/etsy-autopilot/.env) — never committed to this repo. See
+# docs/PRODUCTION_DEPLOY.md for the full variable list and exactly which
+# values are safe to generate vs. must be entered by hand.
 
 services:
   postgres:
@@ -57,8 +64,11 @@ services:
       retries: 5
 
   migrate:
-    image: ghcr.io/akifyapayzeka/etsymagazam-api:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
     networks: [etsy_internal]
+    env_file: .env
     environment:
       DATABASE_URL: postgresql://etsy_autopilot:${POSTGRES_PASSWORD}@postgres:5432/etsy_autopilot
     depends_on:
@@ -68,9 +78,12 @@ services:
     restart: "no"
 
   api:
-    image: ghcr.io/akifyapayzeka/etsymagazam-api:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
     restart: unless-stopped
     networks: [etsy_internal, n8n_default]
+    env_file: .env
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://etsy_autopilot:${POSTGRES_PASSWORD}@postgres:5432/etsy_autopilot
@@ -81,14 +94,6 @@ services:
       ETSY_WEBHOOK_URL: https://etsy-api.studyoafg.com/api/etsy/webhooks
       BRAND_DISPLAY_NAME: Form & Fern
       STORAGE_LOCAL_PATH: /repo/storage
-      # --- secrets: set in the Hostinger project environment, never here ---
-      ETSY_API_KEYSTRING: ${ETSY_API_KEYSTRING}
-      ETSY_SHARED_SECRET: ${ETSY_SHARED_SECRET}
-      ETSY_WEBHOOK_SIGNING_SECRET: ${ETSY_WEBHOOK_SIGNING_SECRET}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      SESSION_SECRET: ${SESSION_SECRET}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
       # --- autopilot gate: keep closed until explicitly opened up ---
       AUTO_PUBLISH: "false"
       DRY_RUN: "true"
@@ -116,9 +121,12 @@ services:
       - traefik.http.services.etsy-api.loadbalancer.server.port=4000
 
   worker:
-    image: ghcr.io/akifyapayzeka/etsymagazam-worker:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
     restart: unless-stopped
     networks: [etsy_internal]
+    env_file: .env
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://etsy_autopilot:${POSTGRES_PASSWORD}@postgres:5432/etsy_autopilot
@@ -127,14 +135,6 @@ services:
       DASHBOARD_BASE_URL: https://etsy-admin.studyoafg.com
       BRAND_DISPLAY_NAME: Form & Fern
       STORAGE_LOCAL_PATH: /repo/storage
-      ETSY_API_KEYSTRING: ${ETSY_API_KEYSTRING}
-      ETSY_SHARED_SECRET: ${ETSY_SHARED_SECRET}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
-      FX_STATIC_RATES: ${FX_STATIC_RATES}
-      AI_TEXT_PROVIDER: ${AI_TEXT_PROVIDER:-mock}
-      AI_IMAGE_PROVIDER: ${AI_IMAGE_PROVIDER:-mock}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
       # --- autopilot gate: keep closed until explicitly opened up ---
       # AUTO_PUBLISH/DRY_RUN are env-controlled read-only defaults; the
       # actual pause switch (AutopilotState.isPaused) is a DB row, set to
@@ -162,7 +162,11 @@ services:
     # the worker is never meant to be reachable from the internet.
 
   dashboard:
-    image: ghcr.io/akifyapayzeka/etsymagazam-dashboard:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: https://etsy-api.studyoafg.com
     restart: unless-stopped
     networks: [n8n_default]
     mem_limit: 256m

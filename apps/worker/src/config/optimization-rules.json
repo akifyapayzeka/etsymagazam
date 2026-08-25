@@ -1,0 +1,6 @@
+{
+  "_comment": "Thresholds for the loser-product management logic (Growth/Optimize agent). Etsy's public API does not expose per-listing views/favorites, so the full funnel-stage logic only activates once that signal is available from a source you wire in; until then the fallback rule (sales + listing age) is what actually runs.",
+  "longNoSaleDays": 60,
+  "zeroVisitsRefreshAfterDays": 21,
+  "highVisitNoSaleThreshold": 50
+}

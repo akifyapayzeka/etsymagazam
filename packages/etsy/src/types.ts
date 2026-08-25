@@ -1,0 +1,138 @@
+/** Minimal, hand-verified subset of the Etsy Open API v3 response/request shapes we actually use. */
+
+export interface EtsyShop {
+  shop_id: number;
+  shop_name: string;
+  currency_code: string;
+  listing_active_count: number;
+  is_vacation: boolean;
+}
+
+/**
+ * Etsy's real Listing resource has no `is_digital` boolean — listing kind is
+ * the `type` enum. `shipping_profile_id` is required when `type: "physical"`
+ * and must be omitted for `"download"` (verified via Etsy's official
+ * `createDraftListing`/`updateListing` docs, DOCS_LAST_VERIFIED).
+ */
+export type EtsyListingType = "physical" | "download" | "both";
+
+/**
+ * Real Etsy `when_made` enum (verified against the live createDraftListing
+ * contract). "made_to_order" means the item is specially made after a
+ * specific customer's order — it must NOT be used for a pre-rendered,
+ * ready-made digital download. Every other value is a date range for when
+ * the item was actually made/created.
+ */
+export type EtsyWhenMade =
+  | "made_to_order"
+  | "2020_2026"
+  | "2010_2019"
+  | "2007_2009"
+  | "before_2007"
+  | "2000_2006"
+  | "1990s"
+  | "1980s"
+  | "1970s"
+  | "1960s"
+  | "1950s"
+  | "1940s"
+  | "1930s"
+  | "1920s"
+  | "1910s"
+  | "1900s"
+  | "1800s"
+  | "1700s"
+  | "before_1700";
+
+export interface CreateDraftListingInput {
+  quantity: number;
+  title: string;
+  description: string;
+  price: number; // major currency unit, e.g. 4.99
+  who_made: "i_did" | "someone_else" | "collective";
+  when_made: EtsyWhenMade;
+  taxonomy_id: number;
+  type: EtsyListingType;
+  tags?: string[];
+  materials?: string[];
+  /** Required when type === "physical"; must be omitted for "download". */
+  shipping_profile_id?: number;
+  is_personalizable?: boolean;
+  should_auto_renew?: boolean;
+  is_supply?: boolean;
+  state?: "draft" | "active";
+  style?: string[];
+}
+
+export interface EtsyListing {
+  listing_id: number;
+  shop_id: number;
+  title: string;
+  description: string;
+  state: "active" | "draft" | "inactive" | "sold_out" | "expired" | "removed";
+  price: { amount: number; divisor: number; currency_code: string };
+  quantity: number;
+  tags: string[];
+  taxonomy_id: number;
+  type: EtsyListingType;
+  url: string;
+  created_timestamp: number;
+  last_modified_timestamp: number;
+}
+
+export interface UpdateListingInput {
+  title?: string;
+  description?: string;
+  price?: number;
+  tags?: string[];
+  materials?: string[];
+  taxonomy_id?: number;
+  type?: EtsyListingType;
+  state?: "active" | "inactive" | "draft";
+  quantity?: number;
+}
+
+export interface EtsyListingImage {
+  listing_image_id: number;
+  listing_id: number;
+  rank: number;
+  url_fullxfull: string;
+}
+
+export interface EtsyListingFile {
+  listing_file_id: number;
+  listing_id: number;
+  rank: number;
+  filename: string;
+  size: number;
+}
+
+export interface EtsyReceipt {
+  receipt_id: number;
+  shop_id: number;
+  buyer_user_id: number;
+  status: string;
+  is_paid: boolean;
+  is_shipped: boolean;
+  grandtotal: { amount: number; divisor: number; currency_code: string };
+  created_timestamp: number;
+  transactions?: EtsyReceiptTransaction[];
+}
+
+export interface EtsyReceiptTransaction {
+  transaction_id: number;
+  listing_id: number;
+  quantity: number;
+  price: { amount: number; divisor: number; currency_code: string };
+}
+
+export interface EtsyPaginatedResponse<T> {
+  count: number;
+  results: T[];
+}
+
+export interface EtsyErrorResponse {
+  error?: string;
+  error_description?: string;
+  message?: string;
+}

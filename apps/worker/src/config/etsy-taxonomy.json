@@ -1,0 +1,14 @@
+{
+  "_comment": "Etsy requires a numeric taxonomy_id on every listing. IDs are specific to Etsy's live seller-taxonomy tree and MUST be looked up for real, not guessed — run `pnpm tsx scripts/fetch-etsy-taxonomy.ts` (repo root) after connecting your shop, find the right category in the printed tree, and fill in the ids below. The Publisher Agent refuses to publish a category with a null id rather than guessing wrong.",
+  "categoryToTaxonomyId": {
+    "wedding": null,
+    "baby": null,
+    "planner": null,
+    "organization": null,
+    "wall_art": null,
+    "business": null,
+    "education": null,
+    "seasonal": null,
+    "cards": null
+  }
+}

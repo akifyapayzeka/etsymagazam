@@ -1,0 +1,62 @@
+# --- Secrets ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+!packages/**/keys/**/*.example
+
+# --- Dependencies ---
+node_modules/
+.pnpm-store/
+
+# --- Build output ---
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+coverage/
+
+# --- Prisma ---
+packages/database/generated/
+
+# --- Local Redis/Postgres dev artifacts ---
+dump.rdb
+*.rdb
+
+# --- Logs ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- AI Autopilot generated content (heavy / customer-facing, never committed) ---
+storage/
+apps/worker/storage/
+apps/api/storage/
+generated-products/
+scripts/output/
+**/generated_products/
+**/customer_files/
+**/listing_images/
+**/mockups/
+**/product-output/
+**/ai-tmp/
+**/*.autopilot-tmp
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# --- Font cache (fetched from Google Fonts at generation time) ---
+.font-cache/
+.preview-output/
+
+# --- Test / misc ---
+.vitest-cache/
+playwright-report/
+test-results/

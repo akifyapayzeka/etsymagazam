@@ -1,0 +1,29 @@
+{
+  "_comment": "Reference Etsy fee schedule used ONLY for internal profit estimation. These are NOT hard-coded into calculation logic — Finance Agent reads this file. Etsy changes fees periodically: verify against https://www.etsy.com/legal/fees/ and update this file (bump `version` + `lastVerified`) rather than editing formulas in code. All figures are Etsy's public standard seller fees as commonly published; treat as an ESTIMATE, not an invoice.",
+  "version": 1,
+  "lastVerified": "2026-01-01",
+  "currency": "USD",
+  "listingFeeFlat": 0.20,
+  "transactionFeePct": 6.5,
+  "regulatoryOperatingFeePctByCountry": {
+    "_comment": "Etsy's 'regulatory operating fee' applies only in specific regions (e.g. some EU countries, UK, Turkey). Set the seller's country below.",
+    "TR": 2.5,
+    "GB": 2.7,
+    "FR": 2.7,
+    "IT": 2.7,
+    "DE": 2.7,
+    "ES": 2.7,
+    "default": 0
+  },
+  "paymentProcessing": {
+    "_comment": "Etsy Payments processing fee = pct * (item price + shipping) + fixed, varies by seller country/currency.",
+    "TR": { "pct": 4.0, "fixed": 0.25, "fixedCurrency": "USD" },
+    "default": { "pct": 3.0, "fixed": 0.25, "fixedCurrency": "USD" }
+  },
+  "offsiteAdsFeePct": {
+    "standard": 15,
+    "highVolume": 12,
+    "highVolumeThresholdUsdTrailing365d": 10000
+  },
+  "currencyConversionFeePct": 2.5
+}

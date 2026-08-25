@@ -1,0 +1,191 @@
+# Production deployment — Etsy AI Autopilot / Form & Fern
+#
+# Deployed as an isolated Hostinger VPS "Docker Compose project" (project
+# name: etsy-autopilot) on a VPS that ALSO runs an unrelated n8n stack. This
+# file is written to never touch that other stack:
+#   - Own Postgres, own Redis, own persistent volumes, own internal network
+#     (etsy_internal) — postgres/redis/worker are NEVER published to the
+#     host and are unreachable from outside this compose project.
+#   - api and dashboard additionally join the pre-existing EXTERNAL network
+#     `n8n_default`, because that is where the shared Traefik reverse proxy
+#     (already running as part of the `n8n` project) lives. We route through
+#     that existing Traefik via labels instead of binding our own to
+#     host ports 80/443, which are already owned by it.
+#   - Images are pre-built and pushed to GHCR by
+#     .github/workflows/deploy.yml — this file intentionally has no `build:`
+#     sections, since a VPS-side "docker compose up" has no access to this
+#     repo's build context.
+#
+# Requires the external resources below to exist before first deploy:
+#   docker network create n8n_default   # already exists (created by the n8n project)
+#
+# All secrets are supplied via the Hostinger project's environment store
+# (hPanel -> VPS -> Docker Manager -> etsy-autopilot -> Environment), never
+# committed here. See docs/PRODUCTION_DEPLOY.md for the full variable list.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    networks: [etsy_internal]
+    environment:
+      POSTGRES_USER: etsy_autopilot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: etsy_autopilot
+    volumes:
+      - etsy_postgres_data:/var/lib/postgresql/data
+    mem_limit: 512m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etsy_autopilot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks: [etsy_internal]
+    volumes:
+      - etsy_redis_data:/data
+    mem_limit: 192m
+    cpus: 0.25
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: ghcr.io/akifyapayzeka/etsymagazam-api:${IMAGE_TAG:-latest}
+    networks: [etsy_internal]
+    environment:
+      DATABASE_URL: postgresql://etsy_autopilot:${POSTGRES_PASSWORD}@postgres:5432/etsy_autopilot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["pnpm", "--filter", "@etsymagazam/database", "run", "migrate"]
+    restart: "no"
+
+  api:
+    image: ghcr.io/akifyapayzeka/etsymagazam-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks: [etsy_internal, n8n_default]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://etsy_autopilot:${POSTGRES_PASSWORD}@postgres:5432/etsy_autopilot
+      REDIS_URL: redis://redis:6379
+      API_BASE_URL: https://etsy-api.studyoafg.com
+      DASHBOARD_BASE_URL: https://etsy-admin.studyoafg.com
+      ETSY_OAUTH_REDIRECT_URI: https://etsy-api.studyoafg.com/api/etsy/oauth/callback
+      ETSY_WEBHOOK_URL: https://etsy-api.studyoafg.com/api/etsy/webhooks
+      BRAND_DISPLAY_NAME: Form & Fern
+      STORAGE_LOCAL_PATH: /repo/storage
+      # --- secrets: set in the Hostinger project environment, never here ---
+      ETSY_API_KEYSTRING: ${ETSY_API_KEYSTRING}
+      ETSY_SHARED_SECRET: ${ETSY_SHARED_SECRET}
+      ETSY_WEBHOOK_SIGNING_SECRET: ${ETSY_WEBHOOK_SIGNING_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      SESSION_SECRET: ${SESSION_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      # --- autopilot gate: keep closed until explicitly opened up ---
+      AUTO_PUBLISH: "false"
+      DRY_RUN: "true"
+    volumes:
+      - etsy_storage_data:/repo/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 384m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.etsy-api.rule=Host(`etsy-api.studyoafg.com`)
+      - traefik.http.routers.etsy-api.entrypoints=websecure
+      - traefik.http.routers.etsy-api.tls.certresolver=mytlschallenge
+      - traefik.http.services.etsy-api.loadbalancer.server.port=4000
+
+  worker:
+    image: ghcr.io/akifyapayzeka/etsymagazam-worker:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks: [etsy_internal]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://etsy_autopilot:${POSTGRES_PASSWORD}@postgres:5432/etsy_autopilot
+      REDIS_URL: redis://redis:6379
+      API_BASE_URL: https://etsy-api.studyoafg.com
+      DASHBOARD_BASE_URL: https://etsy-admin.studyoafg.com
+      BRAND_DISPLAY_NAME: Form & Fern
+      STORAGE_LOCAL_PATH: /repo/storage
+      ETSY_API_KEYSTRING: ${ETSY_API_KEYSTRING}
+      ETSY_SHARED_SECRET: ${ETSY_SHARED_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      FX_STATIC_RATES: ${FX_STATIC_RATES}
+      AI_TEXT_PROVIDER: ${AI_TEXT_PROVIDER:-mock}
+      AI_IMAGE_PROVIDER: ${AI_IMAGE_PROVIDER:-mock}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      # --- autopilot gate: keep closed until explicitly opened up ---
+      # AUTO_PUBLISH/DRY_RUN are env-controlled read-only defaults; the
+      # actual pause switch (AutopilotState.isPaused) is a DB row, set to
+      # true automatically on first OAuth connect (see etsy-oauth.ts) — it
+      # is not an env var. Flip it via the dashboard when ready to unpause.
+      AUTO_PUBLISH: "false"
+      DRY_RUN: "true"
+    volumes:
+      - etsy_storage_data:/repo/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 384m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4100/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    # No Traefik labels, no host/external network membership on purpose —
+    # the worker is never meant to be reachable from the internet.
+
+  dashboard:
+    image: ghcr.io/akifyapayzeka/etsymagazam-dashboard:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    networks: [n8n_default]
+    mem_limit: 256m
+    cpus: 0.25
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.etsy-admin.rule=Host(`etsy-admin.studyoafg.com`)
+      - traefik.http.routers.etsy-admin.entrypoints=websecure
+      - traefik.http.routers.etsy-admin.tls.certresolver=mytlschallenge
+      - traefik.http.services.etsy-admin.loadbalancer.server.port=3000
+
+networks:
+  etsy_internal:
+    driver: bridge
+  n8n_default:
+    external: true
+
+volumes:
+  etsy_postgres_data:
+  etsy_redis_data:
+  etsy_storage_data:

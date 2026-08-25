@@ -1,0 +1,43 @@
+{
+  "name": "etsymagazam",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Etsy AI Autopilot - fully automated AI-driven Etsy digital product store management system",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r --filter=./packages/* run build && pnpm -r --filter=./apps/* run build",
+    "dev:api": "pnpm --filter @etsymagazam/api dev",
+    "dev:worker": "pnpm --filter @etsymagazam/worker dev",
+    "dev:dashboard": "pnpm --filter @etsymagazam/dashboard dev",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "pnpm --filter @etsymagazam/database run generate",
+    "db:migrate": "pnpm --filter @etsymagazam/database run migrate",
+    "db:seed": "pnpm --filter @etsymagazam/database run seed",
+    "pipeline:dry-run": "tsx scripts/run-pipeline-test.ts"
+  },
+  "dependencies": {
+    "@etsymagazam/ai": "workspace:*",
+    "@etsymagazam/core": "workspace:*",
+    "@etsymagazam/database": "workspace:*",
+    "@etsymagazam/etsy": "workspace:*",
+    "@etsymagazam/product-generator": "workspace:*",
+    "@etsymagazam/qa": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/dist
+**/coverage
+.git
+.font-cache
+.preview-output
+storage
+scripts/output
+packages/database/generated
+*.log
+.env
+.env.*
+!.env.example

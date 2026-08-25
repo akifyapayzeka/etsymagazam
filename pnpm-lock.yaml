@@ -110,6 +110,25 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)
 
+  packages/qa:
+    dependencies:
+      '@etsymagazam/core':
+        specifier: workspace:*
+        version: link:../core
+      '@etsymagazam/product-generator':
+        specifier: workspace:*
+        version: link:../product-generator
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
+
 packages:
 
   '@aws-sdk/checksums@3.1000.29':

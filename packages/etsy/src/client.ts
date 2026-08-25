@@ -65,6 +65,11 @@ export class EtsyApiClient {
     return this.request<EtsyShop>("GET", `/shops/${shopId}`);
   }
 
+  /** Resolves the Etsy shop(s) owned by the authorizing user — used right after OAuth to discover the shop id. */
+  async getShopsByOwnerUserId(userId: string): Promise<EtsyPaginatedResponse<EtsyShop>> {
+    return this.request<EtsyPaginatedResponse<EtsyShop>>("GET", `/users/${userId}/shops`);
+  }
+
   async createDraftListing(input: CreateDraftListingInput): Promise<EtsyListing> {
     return this.request<EtsyListing>("POST", `/shops/${this.opts.shopId}/listings`, { json: input });
   }

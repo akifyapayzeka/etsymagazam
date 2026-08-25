@@ -20,6 +20,7 @@ const envSchema = z.object({
   ETSY_API_KEYSTRING: z.string().optional().default(""),
   ETSY_SHARED_SECRET: z.string().optional().default(""),
   ETSY_SHOP_ID: z.string().optional().default(""),
+  ETSY_WEBHOOK_SIGNING_SECRET: z.string().optional().default(""),
   ETSY_OAUTH_SCOPES: z
     .string()
     .default("listings_r,listings_w,listings_d,shops_r,shops_w,transactions_r,transactions_w,profile_r"),

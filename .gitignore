@@ -22,6 +22,10 @@ coverage/
 # --- Prisma ---
 packages/database/generated/
 
+# --- Local Redis/Postgres dev artifacts ---
+dump.rdb
+*.rdb
+
 # --- Logs ---
 *.log
 npm-debug.log*

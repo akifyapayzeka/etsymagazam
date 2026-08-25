@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 
-const password = process.argv[2];
+// pnpm's `run <script> -- <arg>` forwards the literal "--" through to some
+// shells/versions instead of stripping it, so skip it if present.
+const args = process.argv.slice(2).filter((a) => a !== "--");
+const password = args[0];
 if (!password) {
   console.error("Usage: pnpm --filter @etsymagazam/api run hash-password -- \"your-password\"");
   process.exit(1);

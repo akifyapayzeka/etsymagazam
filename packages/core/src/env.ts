@@ -1,4 +1,25 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
 import { z } from "zod";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+/** packages/core/src -> repo root */
+const REPO_ROOT = path.resolve(__dirname, "../../../");
+
+/**
+ * Loads `.env` from the repo root (if present) into process.env, without
+ * overriding variables the process/platform already set — real deployment
+ * secrets (Docker Compose `env_file`, a PaaS's env panel, CI secrets)
+ * always win over a local .env file. Safe to call more than once.
+ */
+function loadDotEnvFile(): void {
+  const envPath = path.join(REPO_ROOT, ".env");
+  if (existsSync(envPath)) {
+    dotenv.config({ path: envPath, override: false });
+  }
+}
 
 /**
  * Central environment schema. Every app (api, worker, dashboard) imports
@@ -86,6 +107,7 @@ let cached: Env | undefined;
 /** Parses and caches process.env once. Throws with a clear message on first bad boot. */
 export function loadEnv(): Env {
   if (cached) return cached;
+  loadDotEnvFile();
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`).join("\n");

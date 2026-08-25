@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
+    "build": "tsc --noEmit",
+    "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -17,10 +17,10 @@
     "@etsymagazam/product-generator": "workspace:*",
     "@etsymagazam/qa": "workspace:*",
     "bullmq": "^5.28.1",
-    "ioredis": "^5.4.1"
+    "ioredis": "^5.4.1",
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }

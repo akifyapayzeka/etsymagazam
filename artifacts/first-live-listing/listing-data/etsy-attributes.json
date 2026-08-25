@@ -1,0 +1,17 @@
+{
+  "occasion": "New pet",
+  "style": "Minimalist",
+  "recipient": "Pet owner",
+  "color": "Sage green",
+  "primaryColor": "Green",
+  "materials": [
+    "Digital File",
+    "PDF",
+    "PNG"
+  ],
+  "who_made": "i_did",
+  "when_made": "made_to_order",
+  "type": "download",
+  "quantity": 999,
+  "should_auto_renew": true
+}

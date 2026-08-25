@@ -1,0 +1,3 @@
+pet_supplies_printable
+
+(This is a category HINT for the human publisher, not a numeric taxonomy_id — the autopilot system never guesses one; see docs/ETSY_SETUP.md step 6 for how it's fetched for real once OAuth is connected. In Etsy's listing editor, type into the category search field and pick the closest match: try "Pet Supplies" first and narrow to a digital/printable pet planner or tracker subcategory if Etsy offers one; if not, "Craft Supplies & Tools > Paper & Party Supplies > Printables" is the right fallback for a printable digital download like this one.)

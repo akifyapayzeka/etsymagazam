@@ -140,10 +140,15 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
         },
       });
 
+      // isPaused defaults to false in the schema (see AutopilotState in
+      // schema.prisma) — that default is fine for local/dev seeding, but a
+      // freshly-connected production shop must start PAUSED, never live by
+      // accident the moment OAuth completes. Set it explicitly here rather
+      // than relying on the schema default.
       await prisma.autopilotState.upsert({
         where: { shopId: shop.id },
         update: {},
-        create: { shopId: shop.id },
+        create: { shopId: shop.id, isPaused: true, pausedReason: "Default state after first Etsy OAuth connect — enable explicitly when ready." },
       });
 
       reply.redirect(`${env.DASHBOARD_BASE_URL}/settings?etsy_connected=1`);

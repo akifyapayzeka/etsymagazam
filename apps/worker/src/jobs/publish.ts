@@ -1,5 +1,5 @@
 import { createLogger, loadEnv } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { getCanonicalShop, prisma } from "@etsymagazam/database";
 import { publishListing } from "../agents/publisher.js";
 import { bumpDailyAutopilotCounter } from "../agents/finance.js";
 import { raiseAlert } from "../lib/decisions.js";
@@ -8,7 +8,7 @@ import type { SeoOutput } from "../agents/seo.js";
 const log = createLogger("job:publish");
 
 export async function handlePublishListing(data: { productId: string; productVersionId: string; priceUsd: number }): Promise<void> {
-  const shop = await prisma.shop.findFirstOrThrow();
+  const shop = await getCanonicalShop();
   const state = await prisma.autopilotState.findUniqueOrThrow({ where: { shopId: shop.id } });
   const product = await prisma.product.findUniqueOrThrow({ where: { id: data.productId } });
   const version = await prisma.productVersion.findUniqueOrThrow({ where: { id: data.productVersionId } });

@@ -1,11 +1,11 @@
 import { createLogger } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { findCanonicalShop, prisma } from "@etsymagazam/database";
 
 const log = createLogger("job:monthly");
 
 /** Monthly full-store strategy/profitability snapshot — recorded, not acted on automatically (a human reviews it). */
 export async function handleMonthlyReport(): Promise<void> {
-  const shop = await prisma.shop.findFirst();
+  const shop = await findCanonicalShop();
   if (!shop) return;
 
   const run = await prisma.automationRun.create({ data: { name: "monthly_portfolio_report", cadence: "monthly" } });

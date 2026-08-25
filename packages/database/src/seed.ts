@@ -1,4 +1,5 @@
 import { prisma } from "./client.js";
+import { CANONICAL_SHOP_ID } from "./shop.js";
 
 /**
  * Idempotent seed: creates the single Shop row this system manages, its
@@ -7,10 +8,10 @@ import { prisma } from "./client.js";
  */
 async function main() {
   const shop = await prisma.shop.upsert({
-    where: { id: "00000000-0000-0000-0000-000000000001" },
+    where: { id: CANONICAL_SHOP_ID },
     update: {},
     create: {
-      id: "00000000-0000-0000-0000-000000000001",
+      id: CANONICAL_SHOP_ID,
       shopName: null,
       currencyCode: "USD",
       timezone: "Europe/Istanbul",

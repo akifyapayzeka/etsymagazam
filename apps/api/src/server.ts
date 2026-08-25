@@ -13,7 +13,15 @@ import opportunityRoutes from "./routes/opportunities.js";
 
 export async function buildServer() {
   const env = loadEnv();
-  const app = Fastify({ logger: { level: env.LOG_LEVEL } });
+  const app = Fastify({
+    logger: {
+      level: env.LOG_LEVEL,
+      redact: {
+        paths: ["req.headers.authorization", "req.headers.cookie", 'req.headers["x-api-key"]', "req.headers['webhook-signature']"],
+        censor: "[REDACTED]",
+      },
+    },
+  });
 
   await app.register(cors, {
     origin: env.DASHBOARD_BASE_URL,

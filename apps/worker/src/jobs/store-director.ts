@@ -1,9 +1,8 @@
-import { prisma } from "@etsymagazam/database";
+import { findCanonicalShop } from "@etsymagazam/database";
 import { runDailyPlanning } from "../agents/store-director.js";
 
 export async function handleDailyPlanning(): Promise<void> {
-  const shops = await prisma.shop.findMany({ where: { etsyShopId: { not: null } } });
-  for (const shop of shops) {
-    await runDailyPlanning(shop.id);
-  }
+  const shop = await findCanonicalShop();
+  if (!shop?.etsyShopId) return; // not connected yet — nothing to plan
+  await runDailyPlanning(shop.id);
 }

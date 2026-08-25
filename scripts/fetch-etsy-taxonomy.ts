@@ -13,24 +13,25 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { decryptSecret, encryptSecret, loadEnv } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { getCanonicalShop, prisma } from "@etsymagazam/database";
 import { EtsyApiClient, refreshAccessToken } from "@etsymagazam/etsy";
 
 async function main() {
   const env = loadEnv();
-  if (!env.ETSY_API_KEYSTRING) {
-    console.error("ETSY_API_KEYSTRING is not set in your .env — see docs/ETSY_SETUP.md.");
+  if (!env.ETSY_API_KEYSTRING || !env.ETSY_SHARED_SECRET) {
+    console.error("ETSY_API_KEYSTRING and ETSY_SHARED_SECRET must both be set in your .env — see docs/ETSY_SETUP.md.");
     process.exit(1);
   }
 
-  const shop = await prisma.shop.findFirst({ where: { etsyShopId: { not: null } } });
-  if (!shop?.etsyShopId) {
+  const shop = await getCanonicalShop();
+  if (!shop.etsyShopId) {
     console.error("No connected shop found. Connect Etsy from the dashboard first (Settings -> Connect Etsy).");
     process.exit(1);
   }
 
   const client = new EtsyApiClient({
     apiKeystring: env.ETSY_API_KEYSTRING,
+    sharedSecret: env.ETSY_SHARED_SECRET,
     shopId: shop.etsyShopId,
     tokenProvider: {
       async getAccessToken(etsyShopId: string) {

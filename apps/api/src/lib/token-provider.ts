@@ -9,41 +9,65 @@ const REFRESH_BUFFER_MS = 5 * 60 * 1000; // refresh 5 minutes before actual expi
  * refreshing (and re-persisting, encrypted) when close to expiry. Etsy
  * rotates the refresh token on every use, so both tokens are re-encrypted
  * and saved together.
+ *
+ * The API and worker are separate processes (and the worker itself runs
+ * many concurrent jobs) that can each decide "this token needs refreshing"
+ * within the same few milliseconds. Without a lock, more than one would
+ * call Etsy's refresh endpoint with the same still-valid refresh token;
+ * because Etsy rotates it on use, only one of those calls is safe — the
+ * other either gets rejected outright, or races the DB write and can leave
+ * the stored token pair as one of the now-invalidated ones. A Postgres
+ * transaction-scoped advisory lock, keyed by the shop id, serializes the
+ * whole check-refresh-persist sequence across every process sharing this
+ * database: a second caller blocks until the first's transaction commits,
+ * then re-reads the now-fresh connection instead of refreshing again.
  */
 export class PrismaAccessTokenProvider implements AccessTokenProvider {
   async getAccessToken(etsyShopId: string): Promise<string> {
     const shop = await prisma.shop.findUnique({ where: { etsyShopId } });
     if (!shop) throw new Error(`No shop record found for Etsy shop id ${etsyShopId}.`);
 
-    const connection = await prisma.etsyConnection.findFirst({
-      where: { shopId: shop.id, isActive: true },
-      orderBy: { createdAt: "desc" },
-    });
-    if (!connection) {
-      throw new Error(
-        `No active Etsy connection for shop ${etsyShopId}. The OAuth authorization needs to be (re)completed — see docs/ETSY_SETUP.md.`,
-      );
-    }
+    return prisma.$transaction(
+      async (tx) => {
+        // Transaction-scoped: automatically released on commit/rollback, so
+        // a crashed process can never leave this stuck locked.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${shop.id}))`;
 
-    const expiresAt = connection.expiresAt.getTime();
-    if (Date.now() < expiresAt - REFRESH_BUFFER_MS) {
-      return decryptSecret(connection.accessTokenEnc);
-    }
+        const connection = await tx.etsyConnection.findFirst({
+          where: { shopId: shop.id, isActive: true },
+          orderBy: { createdAt: "desc" },
+        });
+        if (!connection) {
+          throw new Error(
+            `No active Etsy connection for shop ${etsyShopId}. The OAuth authorization needs to be (re)completed — see docs/ETSY_SETUP.md.`,
+          );
+        }
 
-    const env = loadEnv();
-    const refreshToken = decryptSecret(connection.refreshTokenEnc);
-    const tokenResponse = await refreshAccessToken({ clientId: env.ETSY_API_KEYSTRING, refreshToken });
+        // Re-check after acquiring the lock: another process may have
+        // already refreshed this exact connection while we were waiting.
+        if (Date.now() < connection.expiresAt.getTime() - REFRESH_BUFFER_MS) {
+          return decryptSecret(connection.accessTokenEnc);
+        }
 
-    await prisma.etsyConnection.update({
-      where: { id: connection.id },
-      data: {
-        accessTokenEnc: encryptSecret(tokenResponse.access_token),
-        refreshTokenEnc: encryptSecret(tokenResponse.refresh_token),
-        expiresAt: new Date(Date.now() + tokenResponse.expires_in * 1000),
-        lastRefreshedAt: new Date(),
+        const env = loadEnv();
+        const refreshToken = decryptSecret(connection.refreshTokenEnc);
+        const tokenResponse = await refreshAccessToken({ clientId: env.ETSY_API_KEYSTRING, refreshToken });
+
+        await tx.etsyConnection.update({
+          where: { id: connection.id },
+          data: {
+            accessTokenEnc: encryptSecret(tokenResponse.access_token),
+            refreshTokenEnc: encryptSecret(tokenResponse.refresh_token),
+            expiresAt: new Date(Date.now() + tokenResponse.expires_in * 1000),
+            lastRefreshedAt: new Date(),
+          },
+        });
+
+        return tokenResponse.access_token;
       },
-    });
-
-    return tokenResponse.access_token;
+      // The critical section includes a real network call to Etsy, so give
+      // it more room than Prisma's 5s interactive-transaction default.
+      { timeout: 15_000, maxWait: 20_000 },
+    );
   }
 }

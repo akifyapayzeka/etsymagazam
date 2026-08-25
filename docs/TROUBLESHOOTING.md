@@ -24,6 +24,19 @@ encrypted Etsy token becomes unreadable — you'll need to reconnect Etsy
   `docker-compose.yml`); check `docker compose logs migrate` if they never
   come up healthy.
 
+## Publisher Agent says "Shop currency is X, but ... no FX rate is configured"
+
+Expected and intentional. All internal pricing (`product-catalog.json`'s
+`basePriceUsd`, `MIN_PRICE`/`MAX_PRICE`) is USD-denominated, and Etsy's
+listing-write endpoints take a bare number with no currency field — Etsy
+interprets whatever you send as an amount in the shop's own currency. If
+your connected shop's currency isn't USD, this system refuses to publish
+rather than silently sending a USD-denominated number as if it were, say,
+EUR (see `packages/core/src/currency.ts`). Fix: set `FX_STATIC_RATES` in
+`.env` to a JSON object mapping the shop's currency to its rate against USD,
+e.g. `FX_STATIC_RATES={"EUR":0.92}`, then restart. Every publish still logs
+the exact FX rate/source used (or the block reason) to the Audit Log.
+
 ## Publisher Agent says "No taxonomy_id configured"
 
 Expected and intentional — see `docs/ETSY_SETUP.md` step 6. Run

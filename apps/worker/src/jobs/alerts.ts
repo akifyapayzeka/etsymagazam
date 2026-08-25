@@ -1,5 +1,5 @@
 import { createLogger } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { findCanonicalShop, prisma } from "@etsymagazam/database";
 import { raiseAlert } from "../lib/decisions.js";
 
 const log = createLogger("job:alerts");
@@ -11,7 +11,7 @@ const log = createLogger("job:alerts");
  * things a human genuinely needs to look at.
  */
 export async function handleAutomationHealthCheck(): Promise<void> {
-  const shop = await prisma.shop.findFirst();
+  const shop = await findCanonicalShop();
   if (!shop) return;
 
   const connection = await prisma.etsyConnection.findFirst({

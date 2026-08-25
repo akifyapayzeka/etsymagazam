@@ -9,10 +9,11 @@ export async function getEtsyClientForShop(shopId: string): Promise<EtsyApiClien
   if (!shop?.etsyShopId) return null;
 
   const env = loadEnv();
-  if (!env.ETSY_API_KEYSTRING) return null;
+  if (!env.ETSY_API_KEYSTRING || !env.ETSY_SHARED_SECRET) return null;
 
   return new EtsyApiClient({
     apiKeystring: env.ETSY_API_KEYSTRING,
+    sharedSecret: env.ETSY_SHARED_SECRET,
     shopId: shop.etsyShopId,
     tokenProvider: new PrismaAccessTokenProvider(),
   });

@@ -1,5 +1,5 @@
 import { encryptSecret, loadEnv } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { CANONICAL_SHOP_ID, getCanonicalShop, prisma } from "@etsymagazam/database";
 import {
   buildAuthorizeUrl,
   DEFAULT_OAUTH_SCOPES,
@@ -17,9 +17,9 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
   /** Step 1 (human-triggered from the dashboard): redirects you to Etsy's consent screen. */
   app.get("/api/etsy/oauth/start", { preHandler: app.requireAuth }, async (req, reply) => {
     const env = loadEnv();
-    if (!env.ETSY_API_KEYSTRING) {
+    if (!env.ETSY_API_KEYSTRING || !env.ETSY_SHARED_SECRET) {
       reply.code(500);
-      return { error: "etsy_not_configured", message: "Set ETSY_API_KEYSTRING in your .env first — see docs/ETSY_SETUP.md." };
+      return { error: "etsy_not_configured", message: "Set ETSY_API_KEYSTRING and ETSY_SHARED_SECRET in your .env first — see docs/ETSY_SETUP.md." };
     }
 
     const { codeVerifier, codeChallenge } = generatePkcePair();
@@ -83,6 +83,7 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
 
       const tempClient = new EtsyApiClient({
         apiKeystring: env.ETSY_API_KEYSTRING,
+        sharedSecret: env.ETSY_SHARED_SECRET,
         shopId: "pending",
         tokenProvider: { getAccessToken: async () => tokenResponse.access_token },
       });
@@ -93,10 +94,30 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
         return { error: "no_shop_found", message: "This Etsy account has no shop. Open your shop on Etsy first, then retry." };
       }
 
-      const shop = await prisma.shop.upsert({
+      // This system manages exactly one shop — always write onto the fixed
+      // canonical row (seeded by packages/database/src/seed.ts) rather than
+      // upserting by etsyShopId. Upserting by etsyShopId would create a
+      // SECOND Shop row on first connect (the seeded row's etsyShopId is
+      // still null at that point, so it wouldn't match), leaving one
+      // orphaned placeholder row and one real row — every other findFirst()
+      // call in the codebase would then be reading an arbitrary one of the
+      // two.
+      const existingOtherShopWithThisEtsyId = await prisma.shop.findUnique({
         where: { etsyShopId: String(etsyShop.shop_id) },
-        update: { shopName: etsyShop.shop_name, currencyCode: etsyShop.currency_code },
+      });
+      if (existingOtherShopWithThisEtsyId && existingOtherShopWithThisEtsyId.id !== CANONICAL_SHOP_ID) {
+        reply.code(500);
+        return {
+          error: "shop_id_conflict",
+          message: "This Etsy shop is already linked to a different internal shop record. This should not happen in a single-shop deployment — check the database for duplicate Shop rows.",
+        };
+      }
+
+      const shop = await prisma.shop.upsert({
+        where: { id: CANONICAL_SHOP_ID },
+        update: { etsyShopId: String(etsyShop.shop_id), shopName: etsyShop.shop_name, currencyCode: etsyShop.currency_code },
         create: {
+          id: CANONICAL_SHOP_ID,
           etsyShopId: String(etsyShop.shop_id),
           shopName: etsyShop.shop_name,
           currencyCode: etsyShop.currency_code,
@@ -133,8 +154,8 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
   /** Verifies the connection actually works end-to-end (ping + shop lookup + capability check) — run this before the first real publish. */
   app.post("/api/etsy/oauth/verify", { preHandler: app.requireAuth }, async (_req, reply) => {
     const env = loadEnv();
-    const shop = await prisma.shop.findFirst({ where: { etsyShopId: { not: null } } });
-    if (!shop?.etsyShopId) {
+    const shop = await getCanonicalShop();
+    if (!shop.etsyShopId) {
       reply.code(400);
       return { error: "not_connected" };
     }
@@ -142,6 +163,7 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
     const { PrismaAccessTokenProvider } = await import("../lib/token-provider.js");
     const client = new EtsyApiClient({
       apiKeystring: env.ETSY_API_KEYSTRING,
+      sharedSecret: env.ETSY_SHARED_SECRET,
       shopId: shop.etsyShopId,
       tokenProvider: new PrismaAccessTokenProvider(),
     });

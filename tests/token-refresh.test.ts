@@ -7,11 +7,20 @@ process.env.REDIS_URL ??= "redis://localhost:6379";
 const findUnique = vi.fn();
 const findFirst = vi.fn();
 const update = vi.fn();
+const executeRaw = vi.fn();
 
 vi.mock("@etsymagazam/database", () => ({
   prisma: {
     shop: { findUnique },
     etsyConnection: { findFirst, update },
+    // The real client's $transaction runs the callback against a `tx`
+    // client backed by one Postgres connection so `pg_advisory_xact_lock`
+    // actually serializes callers; here it just invokes the callback
+    // against the same mocked table methods, since what's under test is
+    // the check-refresh-persist logic inside the transaction, not Postgres
+    // locking itself (covered by the real DB in the CI integration run).
+    $transaction: (fn: (tx: unknown) => Promise<unknown>) =>
+      fn({ $executeRaw: executeRaw, etsyConnection: { findFirst, update } }),
   },
 }));
 
@@ -20,6 +29,7 @@ describe("PrismaAccessTokenProvider (integration: token refresh flow)", () => {
     findUnique.mockReset();
     findFirst.mockReset();
     update.mockReset();
+    executeRaw.mockReset().mockResolvedValue(undefined);
     vi.unstubAllGlobals();
   });
 

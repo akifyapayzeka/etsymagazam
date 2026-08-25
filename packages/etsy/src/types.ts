@@ -8,6 +8,14 @@ export interface EtsyShop {
   is_vacation: boolean;
 }
 
+/**
+ * Etsy's real Listing resource has no `is_digital` boolean — listing kind is
+ * the `type` enum. `shipping_profile_id` is required when `type: "physical"`
+ * and must be omitted for `"download"` (verified via Etsy's official
+ * `createDraftListing`/`updateListing` docs, DOCS_LAST_VERIFIED).
+ */
+export type EtsyListingType = "physical" | "download" | "both";
+
 export interface CreateDraftListingInput {
   quantity: number;
   title: string;
@@ -16,10 +24,11 @@ export interface CreateDraftListingInput {
   who_made: "i_did" | "someone_else" | "collective";
   when_made: string; // e.g. "made_to_order"
   taxonomy_id: number;
+  type: EtsyListingType;
   tags?: string[];
   materials?: string[];
+  /** Required when type === "physical"; must be omitted for "download". */
   shipping_profile_id?: number;
-  is_digital: true;
   is_personalizable?: boolean;
   should_auto_renew?: boolean;
   is_supply?: boolean;
@@ -37,7 +46,7 @@ export interface EtsyListing {
   quantity: number;
   tags: string[];
   taxonomy_id: number;
-  is_digital: boolean;
+  type: EtsyListingType;
   url: string;
   created_timestamp: number;
   last_modified_timestamp: number;
@@ -50,6 +59,7 @@ export interface UpdateListingInput {
   tags?: string[];
   materials?: string[];
   taxonomy_id?: number;
+  type?: EtsyListingType;
   state?: "active" | "inactive" | "draft";
   quantity?: number;
 }

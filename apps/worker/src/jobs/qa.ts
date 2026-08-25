@@ -1,5 +1,5 @@
 import { createLogger, loadEnv, QUEUE_NAMES } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { getCanonicalShop, prisma } from "@etsymagazam/database";
 import { runQa } from "../agents/qa.js";
 import { bumpDailyAutopilotCounter } from "../agents/finance.js";
 import { recordAudit } from "../lib/decisions.js";
@@ -15,7 +15,7 @@ export interface QaJobData {
 }
 
 export async function handleRunQa(data: QaJobData): Promise<void> {
-  const shop = await prisma.shop.findFirstOrThrow();
+  const shop = await getCanonicalShop();
   const state = await prisma.autopilotState.findUniqueOrThrow({ where: { shopId: shop.id } });
   const version = await prisma.productVersion.findUniqueOrThrow({ where: { id: data.productVersionId } });
   const seo = version.seoJson as unknown as SeoOutput;

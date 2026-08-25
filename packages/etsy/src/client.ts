@@ -30,6 +30,8 @@ export interface AccessTokenProvider {
 
 export interface EtsyApiClientOptions {
   apiKeystring: string;
+  /** Etsy's "Shared secret" from the Developer Portal. Required — the x-api-key header is `keystring:sharedSecret`, not the keystring alone. */
+  sharedSecret: string;
   tokenProvider: AccessTokenProvider;
   shopId: string;
   maxRetries?: number;
@@ -52,6 +54,9 @@ export class EtsyApiClient {
   private readonly maxRetries: number;
 
   constructor(private readonly opts: EtsyApiClientOptions) {
+    if (!opts.sharedSecret) {
+      throw new Error("EtsyApiClient requires sharedSecret (Etsy's x-api-key header is keystring:sharedSecret, not the keystring alone).");
+    }
     this.limiter = new RateLimiter(RATE_LIMITS.queriesPerSecond, RATE_LIMITS.queriesPerDay);
     this.fetchImpl = opts.fetchImpl ?? fetch;
     this.maxRetries = opts.maxRetries ?? 4;
@@ -70,12 +75,14 @@ export class EtsyApiClient {
     return this.request<EtsyPaginatedResponse<EtsyShop>>("GET", `/users/${userId}/shops`);
   }
 
+  /** createDraftListing requires application/x-www-form-urlencoded, not JSON (verified against Etsy's official docs). */
   async createDraftListing(input: CreateDraftListingInput): Promise<EtsyListing> {
-    return this.request<EtsyListing>("POST", `/shops/${this.opts.shopId}/listings`, { json: input });
+    return this.request<EtsyListing>("POST", `/shops/${this.opts.shopId}/listings`, { formUrlEncoded: input });
   }
 
+  /** updateListing also requires application/x-www-form-urlencoded, not JSON. */
   async updateListing(listingId: string, input: UpdateListingInput): Promise<EtsyListing> {
-    return this.request<EtsyListing>("PATCH", `/shops/${this.opts.shopId}/listings/${listingId}`, { json: input });
+    return this.request<EtsyListing>("PATCH", `/shops/${this.opts.shopId}/listings/${listingId}`, { formUrlEncoded: input });
   }
 
   async getListing(listingId: string): Promise<EtsyListing> {
@@ -153,7 +160,7 @@ export class EtsyApiClient {
   private async request<T>(
     method: string,
     path: string,
-    opts: { json?: unknown; form?: FormData; skipAuth?: boolean } = {},
+    opts: { json?: unknown; form?: FormData; formUrlEncoded?: object; skipAuth?: boolean } = {},
   ): Promise<T> {
     let attempt = 0;
     // eslint-disable-next-line no-constant-condition
@@ -161,7 +168,9 @@ export class EtsyApiClient {
       attempt += 1;
       await this.limiter.acquire();
 
-      const headers: Record<string, string> = { "x-api-key": this.opts.apiKeystring };
+      const headers: Record<string, string> = {
+        "x-api-key": `${this.opts.apiKeystring}:${this.opts.sharedSecret}`,
+      };
       if (!opts.skipAuth) {
         const token = await this.opts.tokenProvider.getAccessToken(this.opts.shopId);
         headers.Authorization = `Bearer ${token}`;
@@ -170,6 +179,9 @@ export class EtsyApiClient {
       if (opts.json !== undefined) {
         headers["Content-Type"] = "application/json";
         body = JSON.stringify(opts.json);
+      } else if (opts.formUrlEncoded !== undefined) {
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
+        body = encodeFormUrlEncoded(opts.formUrlEncoded);
       } else if (opts.form) {
         body = opts.form;
       }
@@ -205,4 +217,24 @@ export class EtsyApiClient {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Encodes a request body as application/x-www-form-urlencoded, as required
+ * by createDraftListing/updateListing. Array values (tags, materials, style)
+ * are joined with commas, matching Etsy's documented convention for
+ * array-typed parameters in form-encoded requests. undefined/null values are
+ * omitted entirely rather than sent as the string "undefined".
+ */
+function encodeFormUrlEncoded(input: object): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      params.set(key, value.join(","));
+    } else {
+      params.set(key, String(value));
+    }
+  }
+  return params.toString();
 }

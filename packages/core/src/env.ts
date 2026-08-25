@@ -42,6 +42,8 @@ const envSchema = z.object({
   ETSY_SHARED_SECRET: z.string().optional().default(""),
   ETSY_SHOP_ID: z.string().optional().default(""),
   ETSY_WEBHOOK_SIGNING_SECRET: z.string().optional().default(""),
+  /** JSON object mapping ISO currency code -> rate relative to USD, e.g. {"EUR":0.92}. All internal pricing (product-catalog.json, MIN_PRICE/MAX_PRICE) is USD-denominated; a shop whose currency isn't USD and isn't listed here is hard-blocked from publishing rather than mis-priced. See packages/core/src/currency.ts. */
+  FX_STATIC_RATES: z.string().optional().default(""),
   ETSY_OAUTH_SCOPES: z
     .string()
     .default("listings_r,listings_w,listings_d,shops_r,shops_w,transactions_r,transactions_w,profile_r"),
@@ -104,6 +106,60 @@ export type Env = z.infer<typeof envSchema>;
 
 let cached: Env | undefined;
 
+/**
+ * Values that only ever belong in a local/dev `.env` — never in a real
+ * deployment. Catches the classic "copied .env.example, forgot to fill in
+ * the real secret" mistake before it ships, rather than after.
+ */
+const KNOWN_INSECURE_DEFAULTS = new Set(["dev-insecure-session-secret-change-me"]);
+
+/**
+ * Fails fast on boot in production if a secret this system genuinely
+ * cannot run without is empty or still holds a known dev placeholder.
+ * Every one of these is either loaded before any Etsy API call is made
+ * (ETSY_API_KEYSTRING/ETSY_SHARED_SECRET), before any secret is
+ * encrypted/decrypted (ENCRYPTION_KEY), before any dashboard session is
+ * signed (SESSION_SECRET), or before anyone can log in
+ * (ADMIN_EMAIL/ADMIN_PASSWORD_HASH) — so a missing one is never a "works
+ * until someone hits that path" surprise later; it's a boot failure now,
+ * with a message naming exactly which var and why.
+ */
+function assertProductionSecrets(env: Env): void {
+  if (env.NODE_ENV !== "production") return;
+
+  const problems: string[] = [];
+
+  const required: Array<[key: keyof Env, label: string]> = [
+    ["ETSY_API_KEYSTRING", "ETSY_API_KEYSTRING"],
+    ["ETSY_SHARED_SECRET", "ETSY_SHARED_SECRET"],
+    ["ENCRYPTION_KEY", "ENCRYPTION_KEY"],
+    ["SESSION_SECRET", "SESSION_SECRET"],
+    ["ADMIN_EMAIL", "ADMIN_EMAIL"],
+    ["ADMIN_PASSWORD_HASH", "ADMIN_PASSWORD_HASH"],
+  ];
+  for (const [key, label] of required) {
+    const value = env[key];
+    if (typeof value !== "string" || value.length === 0) {
+      problems.push(`${label} is empty.`);
+    } else if (KNOWN_INSECURE_DEFAULTS.has(value)) {
+      problems.push(`${label} is still set to a known dev-only default value — generate a real one.`);
+    }
+  }
+
+  if (env.ENCRYPTION_KEY) {
+    const decoded = Buffer.from(env.ENCRYPTION_KEY, "base64");
+    if (decoded.length !== 32) {
+      problems.push("ENCRYPTION_KEY must decode to exactly 32 bytes (openssl rand -base64 32).");
+    }
+  }
+
+  if (problems.length > 0) {
+    throw new Error(
+      `Refusing to start with NODE_ENV=production and insecure/missing secrets:\n${problems.map((p) => `  - ${p}`).join("\n")}\n\nSee docs/ETSY_SETUP.md and docs/SECURITY.md. (This check only runs when NODE_ENV=production — local/dev/test are unaffected.)`,
+    );
+  }
+}
+
 /** Parses and caches process.env once. Throws with a clear message on first bad boot. */
 export function loadEnv(): Env {
   if (cached) return cached;
@@ -113,6 +169,7 @@ export function loadEnv(): Env {
     const issues = parsed.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`).join("\n");
     throw new Error(`Invalid environment configuration:\n${issues}\n\nSee .env.example for the full list.`);
   }
+  assertProductionSecrets(parsed.data);
   cached = parsed.data;
   return cached;
 }

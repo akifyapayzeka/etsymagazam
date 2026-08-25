@@ -1,12 +1,12 @@
 import { createLogger, QUEUE_NAMES } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { getCanonicalShop, prisma } from "@etsymagazam/database";
 import { computeInitialPrice, reviewListingPrice } from "../agents/pricing.js";
 import { getQueue } from "../lib/queues.js";
 
 const log = createLogger("job:pricing");
 
 export async function handleSetInitialPrice(data: { productId: string; productVersionId: string }): Promise<void> {
-  const shop = await prisma.shop.findFirstOrThrow();
+  const shop = await getCanonicalShop();
   const state = await prisma.autopilotState.findUniqueOrThrow({ where: { shopId: shop.id } });
   const product = await prisma.product.findUniqueOrThrow({ where: { id: data.productId } });
   const version = await prisma.productVersion.findUniqueOrThrow({ where: { id: data.productVersionId } });
@@ -29,7 +29,7 @@ export async function handleSetInitialPrice(data: { productId: string; productVe
 }
 
 export async function handleWeeklyPriceReview(): Promise<void> {
-  const shop = await prisma.shop.findFirstOrThrow();
+  const shop = await getCanonicalShop();
   const state = await prisma.autopilotState.findUniqueOrThrow({ where: { shopId: shop.id } });
   const listings = await prisma.listing.findMany({ where: { state: "ACTIVE" } });
 

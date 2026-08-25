@@ -1,5 +1,5 @@
 import { estimateEtsyFees } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { findCanonicalShop, prisma } from "@etsymagazam/database";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 
@@ -15,7 +15,7 @@ export default async function dashboardRoutes(app: FastifyInstance) {
 
   /** The "I just want to see the money" screen. */
   app.get("/api/dashboard/money", async () => {
-    const shop = await prisma.shop.findFirst();
+    const shop = await findCanonicalShop();
     if (!shop) return { error: "no_shop" };
 
     const today = startOfDayUtc();
@@ -63,7 +63,7 @@ export default async function dashboardRoutes(app: FastifyInstance) {
 
   /** The full operator dashboard. */
   app.get("/api/dashboard/summary", async () => {
-    const shop = await prisma.shop.findFirst();
+    const shop = await findCanonicalShop();
     if (!shop) return { error: "no_shop" };
 
     const today = startOfDayUtc();
@@ -111,13 +111,13 @@ export default async function dashboardRoutes(app: FastifyInstance) {
   });
 
   app.get("/api/dashboard/autopilot", async () => {
-    const shop = await prisma.shop.findFirst();
+    const shop = await findCanonicalShop();
     if (!shop) return { error: "no_shop" };
     return prisma.autopilotState.findUnique({ where: { shopId: shop.id } });
   });
 
   app.post("/api/dashboard/autopilot/pause", { preHandler: app.requireCsrf }, async (req) => {
-    const shop = await prisma.shop.findFirst();
+    const shop = await findCanonicalShop();
     if (!shop) return { error: "no_shop" };
     const body = z.object({ reason: z.string().optional() }).parse(req.body ?? {});
     const state = await prisma.autopilotState.update({
@@ -131,7 +131,7 @@ export default async function dashboardRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/dashboard/autopilot/resume", { preHandler: app.requireCsrf }, async () => {
-    const shop = await prisma.shop.findFirst();
+    const shop = await findCanonicalShop();
     if (!shop) return { error: "no_shop" };
     const state = await prisma.autopilotState.update({
       where: { shopId: shop.id },
@@ -156,7 +156,7 @@ export default async function dashboardRoutes(app: FastifyInstance) {
   });
 
   app.patch("/api/dashboard/autopilot/settings", { preHandler: app.requireCsrf }, async (req, reply) => {
-    const shop = await prisma.shop.findFirst();
+    const shop = await findCanonicalShop();
     if (!shop) return { error: "no_shop" };
     const parsed = settingsSchema.safeParse(req.body);
     if (!parsed.success) {

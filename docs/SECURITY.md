@@ -4,6 +4,19 @@
 
 - **Never commit `.env`** — it's gitignored. `.env.example` documents every
   variable with no real values.
+- With `NODE_ENV=production`, boot fails fast (before serving any traffic)
+  if `ETSY_API_KEYSTRING`, `ETSY_SHARED_SECRET`, `ENCRYPTION_KEY`,
+  `SESSION_SECRET`, `ADMIN_EMAIL`, or `ADMIN_PASSWORD_HASH` is empty, or if
+  `SESSION_SECRET` is still the dev-only placeholder value — see
+  `packages/core/src/env.ts`'s `assertProductionSecrets`. This check is a
+  no-op outside production, so local/dev/test boot normally without every
+  secret filled in.
+- Loggers (`packages/core/src/logger.ts`, and the Fastify API server's own
+  request logger) redact common secret-shaped field names and sensitive
+  request headers (`authorization`, `cookie`, `x-api-key`,
+  `webhook-signature`) as defense-in-depth — no code path in this repo
+  intentionally logs a raw secret, but a field named like one won't leak
+  even if that ever changes by mistake.
 - Etsy OAuth tokens are encrypted at rest (AES-256-GCM,
   `packages/core/src/crypto.ts`) using `ENCRYPTION_KEY`
   (`openssl rand -base64 32`). Losing this key means losing the ability to

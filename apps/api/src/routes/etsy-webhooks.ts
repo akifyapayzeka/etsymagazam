@@ -1,5 +1,5 @@
 import { loadEnv } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { Prisma, prisma } from "@etsymagazam/database";
 import { parseWebhookPayload, verifyWebhookSignature, WebhookVerificationError } from "@etsymagazam/etsy";
 import type { FastifyInstance } from "fastify";
 import { getQueue, QUEUE_NAMES } from "../lib/queues.js";
@@ -58,7 +58,15 @@ export default async function etsyWebhookRoutes(app: FastifyInstance) {
     const payload = parseWebhookPayload(rawBody);
     const externalId = String(req.headers["webhook-id"] ?? "");
 
-    // Idempotent insert: the unique (provider, externalId) constraint makes a duplicate delivery a no-op.
+    // Cheap pre-check to skip the common duplicate-delivery case without
+    // touching the queue. This alone is NOT the idempotency guarantee —
+    // two redeliveries of the same webhook can both read "not found" here
+    // before either has inserted (Etsy does redeliver on timeout, and nginx
+    // etc. can forward a request twice). The real guarantee is the DB's
+    // unique (provider, externalId) constraint below: only one create() can
+    // ever succeed for a given externalId, and the other's constraint
+    // violation is caught and treated as the duplicate it is, rather than
+    // surfacing as a 500 (which would just make Etsy redeliver again).
     const shop = await prisma.shop.findUnique({ where: { etsyShopId: String(payload.shop_id) } });
     const existing = await prisma.webhookEvent.findUnique({
       where: { provider_externalId: { provider: "etsy", externalId } },
@@ -69,16 +77,25 @@ export default async function etsyWebhookRoutes(app: FastifyInstance) {
       return { status: "duplicate_ignored" };
     }
 
-    const event = await prisma.webhookEvent.create({
-      data: {
-        shopId: shop?.id,
-        provider: "etsy",
-        eventType: payload.event_type,
-        externalId,
-        payload: payload as unknown as object,
-        status: "RECEIVED",
-      },
-    });
+    let event;
+    try {
+      event = await prisma.webhookEvent.create({
+        data: {
+          shopId: shop?.id,
+          provider: "etsy",
+          eventType: payload.event_type,
+          externalId,
+          payload: payload as unknown as object,
+          status: "RECEIVED",
+        },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        reply.code(200);
+        return { status: "duplicate_ignored" };
+      }
+      throw err;
+    }
 
     await getQueue(QUEUE_NAMES.WEBHOOK_PROCESS).add("process-webhook-event", { webhookEventId: event.id });
 

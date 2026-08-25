@@ -130,6 +130,7 @@ model ProductVersion {
   ipChecks        IpCheck[]
   listings        Listing[]
   generationCosts GenerationCost[]
+  publishState    PublishState?
 
   @@unique([productId, versionNumber])
   @@map("product_versions")
@@ -375,6 +376,39 @@ model DigitalFile {
 
   @@index([listingId])
   @@map("digital_files")
+}
+
+// Durable idempotency ledger for the publish pipeline. createDraftListing,
+// image/file uploads, and activation are separate Etsy API calls; a BullMQ
+// job retry (or a worker crash mid-publish) must never repeat a step that
+// already succeeded on Etsy — most importantly, never call
+// createDraftListing twice for the same product version. Each step's
+// completion (and the real Etsy listing_id, the moment it exists) is
+// persisted here before the next step runs, so a retry resumes instead of
+// restarting. See apps/worker/src/agents/publisher.ts.
+enum PublishStepStatus {
+  PENDING
+  LISTING_CREATED
+  ASSETS_UPLOADED
+  COMPLETED
+  FAILED
+}
+
+model PublishState {
+  id               String            @id @default(uuid())
+  productId        String            @map("product_id")
+  productVersionId String            @unique @map("product_version_id")
+  productVersion   ProductVersion    @relation(fields: [productVersionId], references: [id], onDelete: Cascade)
+  status           PublishStepStatus @default(PENDING)
+  etsyListingId    String?           @unique @map("etsy_listing_id")
+  imagesUploaded   Boolean           @default(false) @map("images_uploaded")
+  filesUploaded    Boolean           @default(false) @map("files_uploaded")
+  activated        Boolean           @default(false)
+  lastError        String?           @map("last_error") @db.Text
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  @@map("publish_states")
 }
 
 // =============================================================================

@@ -11,6 +11,7 @@ afterEach(() => {
 function makeClient(fetchImpl: typeof fetch) {
   return new EtsyApiClient({
     apiKeystring: "test-key",
+    sharedSecret: "test-shared-secret",
     shopId: "123",
     tokenProvider: { getAccessToken: async () => "test-token" },
     fetchImpl,
@@ -74,5 +75,77 @@ describe("EtsyApiClient retry/backoff", () => {
     await assertion;
     // 1 initial attempt + 3 retries = 4 calls
     expect(fetchImpl).toHaveBeenCalledTimes(4);
+  });
+});
+
+describe("EtsyApiClient auth header", () => {
+  it("requires sharedSecret and throws a clear error without it", () => {
+    expect(
+      () =>
+        new EtsyApiClient({
+          apiKeystring: "test-key",
+          sharedSecret: "",
+          shopId: "123",
+          tokenProvider: { getAccessToken: async () => "test-token" },
+        }),
+    ).toThrow(/sharedSecret/);
+  });
+
+  it("sends x-api-key as keystring:sharedSecret, not the keystring alone", async () => {
+    let capturedHeaders: Headers | undefined;
+    const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
+      capturedHeaders = new Headers(init?.headers);
+      return new Response(JSON.stringify({ shop_id: 1, shop_name: "OK" }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const client = makeClient(fetchImpl);
+    await client.getShop("1");
+
+    expect(capturedHeaders?.get("x-api-key")).toBe("test-key:test-shared-secret");
+  });
+});
+
+describe("EtsyApiClient createDraftListing/updateListing encoding", () => {
+  it("sends createDraftListing as application/x-www-form-urlencoded with a type field, not JSON with is_digital", async () => {
+    let capturedHeaders: Headers | undefined;
+    let capturedBody: string | undefined;
+    const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
+      capturedHeaders = new Headers(init?.headers);
+      capturedBody = init?.body as string;
+      return new Response(JSON.stringify({ listing_id: 1, shop_id: 123 }), { status: 201 });
+    }) as unknown as typeof fetch;
+
+    const client = makeClient(fetchImpl);
+    await client.createDraftListing({
+      quantity: 999,
+      title: "Test listing",
+      description: "A test digital listing",
+      price: 4.99,
+      who_made: "i_did",
+      when_made: "made_to_order",
+      taxonomy_id: 1234,
+      type: "download",
+      tags: ["planner", "digital"],
+    });
+
+    expect(capturedHeaders?.get("content-type")).toBe("application/x-www-form-urlencoded");
+    expect(typeof capturedBody).toBe("string");
+    const params = new URLSearchParams(capturedBody);
+    expect(params.get("type")).toBe("download");
+    expect(params.get("tags")).toBe("planner,digital");
+    expect(params.has("is_digital")).toBe(false);
+  });
+
+  it("sends updateListing as application/x-www-form-urlencoded", async () => {
+    let capturedHeaders: Headers | undefined;
+    const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
+      capturedHeaders = new Headers(init?.headers);
+      return new Response(JSON.stringify({ listing_id: 1, shop_id: 123 }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const client = makeClient(fetchImpl);
+    await client.updateListing("1", { state: "active" });
+
+    expect(capturedHeaders?.get("content-type")).toBe("application/x-www-form-urlencoded");
   });
 });

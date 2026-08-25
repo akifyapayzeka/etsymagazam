@@ -206,7 +206,7 @@ async function main() {
     description: seo.description,
     price: priceUsd,
     tags: seo.tags,
-    is_digital: true,
+    type: "download",
     who_made: "i_did",
     when_made: "made_to_order",
     listingImages: manifest.listingImages.map((i) => i.path),

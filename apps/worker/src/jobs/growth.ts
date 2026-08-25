@@ -1,5 +1,5 @@
 import { createLogger, QUEUE_NAMES } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { getCanonicalShop } from "@etsymagazam/database";
 import { findGrowthCandidates } from "../agents/growth.js";
 import { reviewUnderperformingProducts } from "../agents/optimize.js";
 import { canGenerateMore } from "../agents/store-director.js";
@@ -8,7 +8,7 @@ import { getQueue } from "../lib/queues.js";
 const log = createLogger("job:growth");
 
 export async function handleScanWinners(): Promise<void> {
-  const shop = await prisma.shop.findFirstOrThrow();
+  const shop = await getCanonicalShop();
 
   const candidates = await findGrowthCandidates();
   for (const { winner, angle } of candidates) {

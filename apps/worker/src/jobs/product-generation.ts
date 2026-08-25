@@ -1,5 +1,5 @@
 import { createLogger, QUEUE_NAMES } from "@etsymagazam/core";
-import { prisma } from "@etsymagazam/database";
+import { getCanonicalShop, prisma } from "@etsymagazam/database";
 import { createProductVersion, slugify } from "../agents/product-creator.js";
 import { draftProductConcept } from "../agents/product-strategy.js";
 import { generateSeoCopy } from "../agents/seo.js";
@@ -23,12 +23,8 @@ export type ProductGenerationJobData =
   | { opportunityId: string }
   | { variationOfProductId: string; angle: string };
 
-async function getPrimaryShop() {
-  return prisma.shop.findFirstOrThrow();
-}
-
 export async function handleGenerateProduct(data: ProductGenerationJobData): Promise<void> {
-  const shop = await getPrimaryShop();
+  const shop = await getCanonicalShop();
 
   const gate = await canGenerateMore(shop.id);
   if (!gate.allowed) {

@@ -1,4 +1,4 @@
-import { createLogger, QUEUE_NAMES } from "@etsymagazam/core";
+import { createLogger, loadEnv, QUEUE_NAMES } from "@etsymagazam/core";
 import { getCanonicalShop, prisma } from "@etsymagazam/database";
 import { createProductVersion, slugify } from "../agents/product-creator.js";
 import { draftProductConcept } from "../agents/product-strategy.js";
@@ -79,7 +79,11 @@ export async function handleGenerateProduct(data: ProductGenerationJobData): Pro
 
   await bumpDailyAutopilotCounter(shop.id, "productsGenerated");
 
-  const version = await createProductVersion(product, concept, shop.shopName ?? "our shop");
+  // Customer-facing brand name — deliberately not shop.shopName, which is
+  // Etsy's own registered/technical shop name and is never shown to
+  // customers (see BRAND_DISPLAY_NAME in packages/core/src/env.ts).
+  const brandName = loadEnv().BRAND_DISPLAY_NAME;
+  const version = await createProductVersion(product, concept, brandName);
 
   const usedAiImages = false; // this template system renders design entirely deterministically (see packages/product-generator)
   const seo = await generateSeoCopy({
@@ -88,6 +92,7 @@ export async function handleGenerateProduct(data: ProductGenerationJobData): Pro
     sizesList: concept.suggestedSizes,
     fileFormats: ["PDF", "PNG", "SVG"],
     usedAiImages,
+    brandName,
   });
 
   await prisma.productVersion.update({ where: { id: version.id }, data: { seoJson: seo as unknown as object } });

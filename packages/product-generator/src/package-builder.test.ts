@@ -36,7 +36,7 @@ describe("ProductPackageBuilder (end-to-end, real rendering)", () => {
     manifest = await builder.build({
       productSlug: "wildflower-wedding-welcome-sign",
       productTitle: "Wildflower Wedding Welcome Sign",
-      shopName: "Test Shop",
+      brandName: "Test Shop",
       templateType: "poster",
       paletteId: "wildflower",
       posterContent: {

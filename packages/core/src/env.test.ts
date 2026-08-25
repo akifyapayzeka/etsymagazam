@@ -17,6 +17,7 @@ const REQUIRED_PROD_SECRETS = {
 
 const ENV_KEYS = [
   "NODE_ENV",
+  "BRAND_DISPLAY_NAME",
   ...Object.keys(REQUIRED_BASE),
   ...Object.keys(REQUIRED_PROD_SECRETS),
 ] as const;
@@ -61,6 +62,15 @@ describe("loadEnv production secret guard", () => {
   it("refuses to boot in production when ENCRYPTION_KEY doesn't decode to 32 bytes", () => {
     setEnv({ NODE_ENV: "production", ...REQUIRED_PROD_SECRETS, ENCRYPTION_KEY: "dG9vLXNob3J0" });
     expect(() => loadEnv()).toThrow(/ENCRYPTION_KEY must decode to exactly 32 bytes/);
+  });
+
+  it("defaults BRAND_DISPLAY_NAME to Form & Fern but honors an explicit override", () => {
+    setEnv({ NODE_ENV: "development" });
+    expect(loadEnv().BRAND_DISPLAY_NAME).toBe("Form & Fern");
+
+    resetEnvCache();
+    setEnv({ NODE_ENV: "development", BRAND_DISPLAY_NAME: "A Different Brand" });
+    expect(loadEnv().BRAND_DISPLAY_NAME).toBe("A Different Brand");
   });
 
   it("reports every missing secret at once, not just the first", () => {

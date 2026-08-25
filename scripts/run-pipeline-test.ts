@@ -107,7 +107,7 @@ async function main() {
   const manifest = await builder.build({
     productSlug: "wildflower-wedding-welcome-sign-pipeline-test",
     productTitle: concept.title,
-    shopName: "Your Shop",
+    brandName: "Form & Fern",
     templateType: "poster",
     paletteId: concept.suggestedPaletteId,
     posterContent: {
@@ -123,7 +123,7 @@ async function main() {
   console.log(`   ${manifest.customerFiles.PNG.length} PNGs, ${manifest.customerFiles.PDF.length} PDF, ${manifest.customerFiles.ZIP.length} ZIP, ${manifest.listingImages.length} listing images\n`);
 
   // --- 4. SEO copy ---
-  const seoPrompt = await loadPrompt("seo-copywriting", 1);
+  const seoPrompt = await loadPrompt("seo-copywriting", 2);
   const aiDisclosureLine = buildAiDisclosureText({ usedAiText: true, usedAiImages: false });
   const seoResult = await ai.text.generate({
     systemPrompt: seoPrompt.system,
@@ -133,6 +133,7 @@ async function main() {
       sizesList: concept.suggestedSizes.join(", "),
       fileFormats: "PDF, PNG, SVG",
       aiDisclosureLine,
+      brandName: "Form & Fern",
     }),
     tier: "cheap",
     jsonMode: true,

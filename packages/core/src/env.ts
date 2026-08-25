@@ -38,6 +38,15 @@ const envSchema = z.object({
   ETSY_OAUTH_REDIRECT_URI: z.string().default("http://localhost:4000/api/etsy/oauth/callback"),
   ETSY_WEBHOOK_URL: z.string().optional().default(""),
 
+  /**
+   * Customer-facing brand name — printed on product files, PDFs, the
+   * license, and mentioned in listing copy. Deliberately separate from
+   * `Shop.shopName` (the shop's registered Etsy account name, e.g. a
+   * technical handle like "FormAndFernCo"), which is never shown to
+   * customers. See packages/product-generator/src/license.ts.
+   */
+  BRAND_DISPLAY_NAME: z.string().default("Form & Fern"),
+
   ETSY_API_KEYSTRING: z.string().optional().default(""),
   ETSY_SHARED_SECRET: z.string().optional().default(""),
   ETSY_SHOP_ID: z.string().optional().default(""),

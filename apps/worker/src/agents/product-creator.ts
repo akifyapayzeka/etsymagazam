@@ -18,7 +18,7 @@ function slugify(title: string, suffix: string): string {
 export async function createProductVersion(
   product: { id: string; slug: string; title: string },
   concept: ProductConcept,
-  shopName: string,
+  brandName: string,
 ): Promise<ProductVersion> {
   const builder = new ProductPackageBuilder(getStorage());
 
@@ -27,7 +27,7 @@ export async function createProductVersion(
   const manifest = await builder.build({
     productSlug: `${product.slug}-v${nextVersionNumber}`,
     productTitle: concept.title,
-    shopName,
+    brandName,
     templateType: concept.templateType,
     paletteId: concept.suggestedPaletteId,
     posterContent:

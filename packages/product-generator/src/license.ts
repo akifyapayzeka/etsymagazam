@@ -1,8 +1,8 @@
 /** Deterministic (non-AI) personal-use digital license text bundled with every product. */
-export function buildLicenseText(productTitle: string, shopName: string): string {
+export function buildLicenseText(productTitle: string, brandName: string): string {
   return `PERSONAL USE LICENSE
 ${productTitle}
-${shopName}
+${brandName}
 
 This is a DIGITAL product. No physical item will be shipped.
 
@@ -16,7 +16,7 @@ You may NOT:
   - Claim the design as your own or resell printed copies commercially.
   - Use this design to create a product for sale (print-on-demand, etc.).
 
-All designs remain the copyright of ${shopName}. Thank you for supporting
+All designs remain the copyright of ${brandName}. Thank you for supporting
 a small, independently-run digital shop.
 
 Questions about your order? Reach out via Etsy Messages and we'll help.

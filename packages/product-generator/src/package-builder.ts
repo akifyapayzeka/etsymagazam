@@ -15,7 +15,8 @@ import { buildPosterNode, type PosterSpec } from "./templates/poster.js";
 export interface ProductGenerationSpec {
   productSlug: string;
   productTitle: string;
-  shopName: string;
+  /** Customer-facing brand name (never the shop's technical/registered Etsy name) — see packages/core/src/env.ts's BRAND_DISPLAY_NAME. */
+  brandName: string;
   templateType: "poster" | "checklist";
   paletteId?: string;
   posterContent?: Omit<PosterSpec, "palette">;
@@ -107,7 +108,7 @@ export class ProductPackageBuilder {
     const instructionsPath = `${productDir}/instructions/how-to-print.txt`;
     await this.storage.write(instructionsPath, Buffer.from(instructionsText, "utf8"));
 
-    const licenseText = buildLicenseText(spec.productTitle, spec.shopName);
+    const licenseText = buildLicenseText(spec.productTitle, spec.brandName);
     const licensePath = `${productDir}/license.txt`;
     await this.storage.write(licensePath, Buffer.from(licenseText, "utf8"));
 

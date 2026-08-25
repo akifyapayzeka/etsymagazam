@@ -20,6 +20,8 @@ export async function generateSeoCopy(input: {
   sizesList: string[];
   fileFormats: string[];
   usedAiImages: boolean;
+  /** Customer-facing brand name (never the shop's technical Etsy name) — see BRAND_DISPLAY_NAME. */
+  brandName: string;
 }): Promise<SeoOutput> {
   const aiDisclosureLine = buildAiDisclosureText({ usedAiText: true, usedAiImages: input.usedAiImages });
 
@@ -33,7 +35,7 @@ export async function generateSeoCopy(input: {
   };
 
   try {
-    const prompt = await loadPrompt("seo-copywriting", 1);
+    const prompt = await loadPrompt("seo-copywriting", 2);
     const { text } = await createAiRouter().text.generate({
       systemPrompt: prompt.system,
       userPrompt: renderPromptTemplate(prompt.userTemplate, {
@@ -42,6 +44,7 @@ export async function generateSeoCopy(input: {
         sizesList: input.sizesList.join(", "),
         fileFormats: input.fileFormats.join(", "),
         aiDisclosureLine,
+        brandName: input.brandName,
       }),
       tier: "cheap",
       jsonMode: true,
@@ -92,7 +95,7 @@ function buildFallbackTags(title: string): string[] {
 }
 
 function buildFallbackDescription(
-  input: { productTitle: string; sizesList: string[]; fileFormats: string[] },
+  input: { productTitle: string; sizesList: string[]; fileFormats: string[]; brandName: string },
   aiDisclosureLine: string,
 ): string {
   return [
@@ -101,6 +104,7 @@ function buildFallbackDescription(
     `This is a DIGITAL product — no physical item will be shipped. Files are delivered instantly after purchase via Etsy.`,
     `For personal use — see the included license.txt for details.`,
     aiDisclosureLine,
+    `Brought to you by ${input.brandName}.`,
   ]
     .filter(Boolean)
     .join("\n\n");

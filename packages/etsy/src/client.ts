@@ -141,6 +141,11 @@ export class EtsyApiClient {
     return this.request<EtsyReceipt>("GET", `/shops/${this.opts.shopId}/receipts/${receiptId}`);
   }
 
+  /** Full seller taxonomy tree — used once (or when categories change) to resolve category names to the numeric taxonomy_id every listing requires. Not cached here; cache at the call site if polling often. */
+  async getSellerTaxonomyNodes(): Promise<EtsyPaginatedResponse<{ id: number; name: string; level: number; parent_id: number | null }>> {
+    return this.request("GET", "/seller-taxonomy/nodes");
+  }
+
   get remainingDailyQuota(): number {
     return this.limiter.remainingToday;
   }

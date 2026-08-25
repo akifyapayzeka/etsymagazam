@@ -76,6 +76,43 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)
 
+  apps/worker:
+    dependencies:
+      '@etsymagazam/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
+      '@etsymagazam/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@etsymagazam/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@etsymagazam/etsy':
+        specifier: workspace:*
+        version: link:../../packages/etsy
+      '@etsymagazam/product-generator':
+        specifier: workspace:*
+        version: link:../../packages/product-generator
+      '@etsymagazam/qa':
+        specifier: workspace:*
+        version: link:../../packages/qa
+      bullmq:
+        specifier: ^5.28.1
+        version: 5.81.3
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.11.1
+    devDependencies:
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.12
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
+
   packages/ai:
     dependencies:
       '@etsymagazam/core':

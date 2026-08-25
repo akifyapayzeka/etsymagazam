@@ -1,0 +1,18 @@
+{
+  "_comment": "Curated starter product types (instant-download digital only — see docs/AUTOPILOT.md). Product Strategy Agent picks a productType for a new opportunity from this list based on category match; Pricing Agent uses basePriceUsd as its starting anchor before performance-based adjustment.",
+  "productTypes": {
+    "wedding_welcome_sign": { "templateType": "poster", "category": "wedding", "defaultSizeIds": ["2x3", "3x4", "a_series"], "basePriceUsd": 6.5 },
+    "wedding_invitation_set": { "templateType": "poster", "category": "wedding", "defaultSizeIds": ["4x5", "a_series"], "basePriceUsd": 8.5 },
+    "bridal_shower_game": { "templateType": "checklist", "category": "wedding", "defaultSizeIds": ["4x5", "a_series"], "basePriceUsd": 4.5 },
+    "baby_shower_game": { "templateType": "checklist", "category": "baby", "defaultSizeIds": ["4x5", "a_series"], "basePriceUsd": 4.5 },
+    "budget_planner": { "templateType": "checklist", "category": "planner", "defaultSizeIds": ["a_series"], "basePriceUsd": 5.5 },
+    "checklist": { "templateType": "checklist", "category": "organization", "defaultSizeIds": ["a_series"], "basePriceUsd": 3.5 },
+    "wall_art_quote": { "templateType": "poster", "category": "wall_art", "defaultSizeIds": ["2x3", "3x4", "11x14", "18x24"], "basePriceUsd": 5.0 },
+    "nursery_printable": { "templateType": "poster", "category": "baby", "defaultSizeIds": ["3x4", "4x5", "11x14"], "basePriceUsd": 5.5 },
+    "business_template": { "templateType": "checklist", "category": "business", "defaultSizeIds": ["a_series"], "basePriceUsd": 6.0 },
+    "printable_worksheet": { "templateType": "checklist", "category": "education", "defaultSizeIds": ["a_series"], "basePriceUsd": 3.5 },
+    "seasonal_printable": { "templateType": "poster", "category": "seasonal", "defaultSizeIds": ["2x3", "a_series"], "basePriceUsd": 4.5 },
+    "printable_card": { "templateType": "poster", "category": "cards", "defaultSizeIds": ["4x5"], "basePriceUsd": 3.0 },
+    "home_organization_printable": { "templateType": "checklist", "category": "organization", "defaultSizeIds": ["a_series"], "basePriceUsd": 4.0 }
+  }
+}

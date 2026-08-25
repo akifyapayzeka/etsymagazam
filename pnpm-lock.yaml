@@ -7,6 +7,25 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@etsymagazam/ai':
+        specifier: workspace:*
+        version: link:packages/ai
+      '@etsymagazam/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@etsymagazam/database':
+        specifier: workspace:*
+        version: link:packages/database
+      '@etsymagazam/etsy':
+        specifier: workspace:*
+        version: link:packages/etsy
+      '@etsymagazam/product-generator':
+        specifier: workspace:*
+        version: link:packages/product-generator
+      '@etsymagazam/qa':
+        specifier: workspace:*
+        version: link:packages/qa
     devDependencies:
       '@types/node':
         specifier: ^22.10.2

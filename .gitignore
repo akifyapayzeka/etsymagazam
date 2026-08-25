@@ -32,6 +32,7 @@ storage/
 apps/worker/storage/
 apps/api/storage/
 generated-products/
+scripts/output/
 **/generated_products/
 **/customer_files/
 **/listing_images/

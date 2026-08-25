@@ -47,6 +47,10 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 
+# --- Font cache (fetched from Google Fonts at generation time) ---
+.font-cache/
+.preview-output/
+
 # --- Test / misc ---
 .vitest-cache/
 playwright-report/

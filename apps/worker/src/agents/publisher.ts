@@ -69,7 +69,12 @@ export async function publishListing(input: PublishInput): Promise<PublishResult
     description: input.seo.description,
     price: priceInShopCurrency,
     who_made: "i_did",
-    when_made: "made_to_order",
+    // Every product this autopilot creates is a pre-rendered, ready-made
+    // instant download — never something made after a specific customer's
+    // order — so "made_to_order" is never correct here. "2020_2026" is the
+    // real Etsy when_made date-range enum value covering products actually
+    // created in that window (see packages/etsy/src/types.ts EtsyWhenMade).
+    when_made: "2020_2026",
     taxonomy_id: taxonomyId,
     type: "download",
     tags: input.seo.tags,

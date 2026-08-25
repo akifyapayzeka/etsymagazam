@@ -1,12 +1,12 @@
 {
   "_comment": "Etsy's Creativity Standards require disclosing generative-AI involvement in a listing. This file is the single editable source for that disclosure copy so policy wording can be updated without touching code — re-verify against https://www.etsy.com/legal/prohibited-items/ and Etsy's Creativity Standards periodically.",
-  "version": 2,
+  "version": 3,
   "lastReviewed": "2026-08-25",
   "policyUrl": "https://www.etsy.com/legal/prohibited-items/",
   "templates": {
-    "ai_text_only": "This listing's description was drafted with AI assistance, directed and edited by the shop owner.",
+    "ai_text_only": "This listing's description and written product content (e.g. checklist/planner text) were drafted with AI assistance, directed and edited by the shop owner. The page layout, typography, and final design are original, non-AI work.",
     "ai_images_only": "Some images in this listing were created with AI-assisted image generation tools, directed by the shop owner.",
-    "ai_text_and_images": "This listing was created with AI assistance (description text and some imagery), directed and curated by the shop owner. The layout, typography, and final design decisions are original work.",
+    "ai_text_and_images": "This listing was created with AI assistance (description text, written product content, and some imagery), directed and curated by the shop owner. The layout, typography, and final design decisions are original work.",
     "none": ""
   }
 }

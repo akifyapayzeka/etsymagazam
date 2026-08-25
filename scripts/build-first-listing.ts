@@ -10,7 +10,7 @@
  * deterministic rendering primitives the autopilot pipeline uses
  * (packages/product-generator — satori + resvg + pdf-lib, no AI in layout
  * or typography, ever) and the exact same QA/IP-guard modules
- * (packages/qa), just orchestrated by hand for a 5-page bundle instead of
+ * (packages/qa), just orchestrated by hand for a 13-page bundle instead of
  * the single-design ProductPackageBuilder wrapper.
  *
  * Run: pnpm tsx scripts/build-first-listing.ts
@@ -55,7 +55,7 @@ const WORK_DIR = path.join(REPO_ROOT, "storage", "first-listing-build");
 const BRAND_NAME = "Form & Fern";
 const PALETTE_ID = "sage";
 const PRODUCT_SLUG = "333-rescue-dog-decompression-tracker";
-const PRODUCT_TITLE = "The 3-3-3 Rescue Dog Decompression Tracker";
+const PRODUCT_TITLE = "The 3-3-3 Rescue Dog Decompression & Adjustment Bundle";
 
 class LocalStorage implements Storage {
   constructor(private readonly root: string) {}
@@ -73,7 +73,7 @@ class LocalStorage implements Storage {
   }
 }
 
-// --- Content: the 5-page bundle -------------------------------------------
+// --- Content: the 13-page bundle -------------------------------------------
 // Written from scratch based on the widely-taught, generic-knowledge "3-3-3
 // rule" concept (independently published by many rescues/shelters — not
 // owned by any single organization), never copied from any one source.
@@ -98,24 +98,104 @@ interface ChecklistPage {
 
 const checklistPages: ChecklistPage[] = [
   {
-    role: "days-1-3",
-    title: "Days 1–3:\nLet Them Decompress",
-    subtitle: "Check off each day. Don't worry about progress yet — just safety and quiet.",
+    role: "72-hours",
+    title: "First 72 Hours:\nCalm-Home Plan",
+    subtitle: "A simple plan for the first three days — focus on calm, not commands.",
     items: [
-      "Quiet space set up: bed, water, and a low-traffic spot to retreat to",
-      "Leash on for every outdoor bathroom break (even in a fenced yard)",
-      "No visitors, parties, or dog park trips this week",
-      "Offered food in a calm, low-pressure spot — no pressure to eat right away",
-      "Let them choose where to rest — did not force cuddles or attention",
-      "Kept walks short and low-stimulation, away from busy areas",
-      "Noticed today's appetite and sleep: normal, restless, or hiding",
-      "Noted any triggers seen today (loud noises, strangers, other pets, etc.)",
-      "Gave them permission to just be a dog — no training pressure yet",
+      "Picked one quiet, low-traffic room as their home base",
+      "Set up food, water, and a bed in that same spot each time",
+      "Kept the leash on for every outdoor bathroom break, even in a fenced yard",
+      "Blocked off exits and hiding spots you don't want them to access",
+      "Put away other pets' toys/bowls until everyone has settled in",
+      "Planned no visitors, parties, or outings for the first 72 hours",
+      "Kept the household calm: lower voices, fewer sudden movements",
+      "Let them approach you first — no forced petting or eye contact",
+      "Confirmed who is \"on duty\" for the first 72 hours if multiple people live here",
+    ],
+  },
+  {
+    role: "safe-space",
+    title: "Safe Space\nSetup",
+    subtitle: "Give them one place in the home that always feels safe and predictable.",
+    items: [
+      "Chose a quiet spot away from doors, windows, and foot traffic",
+      "Set up a crate, bed, or mat with a blanket that has a familiar scent",
+      "Made sure the space has an exit they can see and reach — never a dead end",
+      "Kept the space consistent — same spot, same bedding, every day",
+      "Told household members this spot is off-limits when they're using it",
+      "Added a chew toy or enrichment item they can self-soothe with",
+      "Checked the spot is a comfortable temperature (not near vents/drafts)",
+      "Introduced kids and guests to the \"leave them alone here\" rule",
+      "Noted whether they're using the space on their own by day 3",
+    ],
+  },
+  {
+    role: "routine-builder",
+    title: "Daily Routine\nBuilder",
+    subtitle: "Predictability helps a nervous dog relax faster. Build the same simple loop each day.",
+    items: [
+      "Set a consistent wake-up time (within about 30 minutes daily)",
+      "Set 2–3 consistent feeding times at the same spot each day",
+      "Scheduled a short morning walk or yard time, same time each day",
+      "Set aside 5–10 minutes of quiet, low-key attention time",
+      "Scheduled a consistent \"settle\" period (crate, mat, or safe space)",
+      "Set a consistent bedtime and wind-down routine",
+      "Picked one consistent word for mealtime and one for walk time",
+      "Wrote the routine somewhere visible for everyone in the house",
+      "Kept the routine as similar as possible on weekends too",
+    ],
+  },
+  {
+    role: "observation-log",
+    title: "Food, Water &\nSleep Watch List",
+    subtitle: "Simple things to notice each day — not a diagnosis, just useful patterns to track.",
+    items: [
+      "Noted whether they ate a full, partial, or no meal today",
+      "Noted whether they drank water normally, more than usual, or barely at all",
+      "Noted roughly how many hours they slept vs. stayed alert and watchful",
+      "Noted any change in bathroom habits worth mentioning at their vet visit",
+      "Noted whether meals were eaten calmly or anxiously/quickly",
+      "Noted any day where sleep or appetite was notably different from the day before",
+      "Circled or starred any pattern that repeated 3+ days in a row",
+      "Wrote down the date they started eating full meals consistently",
+      "Flagged anything unusual to bring up at their first vet visit",
+    ],
+  },
+  {
+    role: "trigger-comfort-log",
+    title: "Trigger &\nComfort Log",
+    subtitle: "Notice what unsettles them and what helps — this becomes your dog's personal playbook.",
+    items: [
+      "Noted specific sounds that caused a startle or freeze response",
+      "Noted specific situations (guests, cars, other dogs) that raised alertness",
+      "Noted the earliest signs of stress you saw (yawning, lip licking, stiffening)",
+      "Noted what helped them settle back down each time",
+      "Noted their favorite calming spot, toy, or activity so far",
+      "Noted which family member or approach they responded to most calmly",
+      "Noted any trigger that seemed to fade with repeated calm exposure",
+      "Wrote down one thing to avoid repeating that clearly overwhelmed them",
+      "Starred any trigger worth discussing with a certified trainer",
+    ],
+  },
+  {
+    role: "first-3-days-reflection",
+    title: "First 3 Days:\nA Reflection",
+    subtitle: "A short space to process this huge transition — for the dog, and for you.",
+    items: [
+      "What surprised you most about their personality so far?",
+      "What was harder than you expected these first few days?",
+      "What went better than you expected?",
+      "What's one small win worth celebrating from today?",
+      "What's one thing you'd do differently if you were starting over?",
+      "How are you feeling about this transition, honestly?",
+      "What questions are you still sitting with after day 3?",
+      "What's one thing you're already grateful for about this dog?",
+      "What's one thing you want to remember about this exact moment?",
     ],
   },
   {
     role: "weeks-1-3",
-    title: "Weeks 1–3:\nBuilding Routine",
+    title: "Weeks 1–3:\nRoutine Tracker",
     subtitle: "Now that the dust has settled, start layering in gentle structure.",
     items: [
       "Feeding and bathroom breaks are becoming predictable and consistent",
@@ -131,7 +211,7 @@ const checklistPages: ChecklistPage[] = [
   },
   {
     role: "months-1-3",
-    title: "Months 1–3:\nSettling In For Good",
+    title: "Months 1–3:\nProgress Tracker",
     subtitle: "Trust deepens here. This is where their real personality starts to show.",
     items: [
       "Personality is coming through — noted what makes them, them",
@@ -146,27 +226,75 @@ const checklistPages: ChecklistPage[] = [
     ],
   },
   {
-    role: "safe-space-and-signs",
-    title: "Safe Space &\nSigns of Progress",
-    subtitle: "A quick-reference checklist for setup and encouraging signs to watch for.",
+    role: "vet-trainer-questions",
+    title: "Questions For Your\nVet or Trainer",
+    subtitle: "Bring this list to your first appointment — you don't have to remember everything.",
     items: [
-      "Designated a quiet 'safe zone' away from foot traffic",
-      "Set up a crate or bed with a blanket that has a familiar scent",
-      "Gates or doors set up so they can retreat without being cornered",
-      "Water available in 1–2 consistent, easy-to-find spots",
+      "Is their weight, coat, and energy level within a healthy range?",
+      "What vaccinations or preventive care are due, and when?",
+      "Is their current food appropriate, or should we discuss alternatives?",
+      "What's a realistic timeline for house-training or routine adjustment?",
+      "Which logged behaviors are typical adjustment vs. worth watching?",
+      "Would a certified trainer help with a specific behavior I've noted?",
+      "What's the best way to introduce them to other pets or people safely?",
+      "Are there local classes, trainers, or behaviorists you'd recommend?",
+      "What symptoms should prompt an immediate call, not a wait-and-see?",
+    ],
+  },
+  {
+    role: "emergency-info",
+    title: "New Home\nEmergency Information",
+    subtitle: "Fill this out once and keep it somewhere everyone in the household can find it.",
+    items: [
+      "Vet clinic name, phone number, and address",
+      "Nearest 24-hour emergency animal hospital and phone number",
+      "Microchip number and registry, if known",
+      "Adoption or rescue organization contact, in case of questions",
+      "Current medications, supplements, or known allergies",
+      "Emergency contact person if you're unreachable",
+      "Pet insurance provider and policy number, if applicable",
+      "Where their leash, carrier, and go-bag are kept",
+      "A recent photo saved somewhere easy to find, in case they get lost",
+    ],
+  },
+  {
+    role: "family-consistency",
+    title: "Family\nConsistency Sheet",
+    subtitle: "Everyone in the house using the same rules and words helps them settle in faster.",
+    items: [
+      "Agreed on the same word for mealtime across all household members",
+      "Agreed on the same word for walks and potty breaks",
+      "Agreed on whether furniture and bed access is allowed, and where",
+      "Agreed on who feeds, walks, and lets them out, and when",
+      "Agreed on how guests should (and shouldn't) greet them at first",
+      "Agreed on what to do if they seem overwhelmed at a family gathering",
+      "Posted the routine somewhere every household member can see it",
+      "Talked with kids about giving space and reading calm body language",
+      "Checked in as a household after week 1 on what's working and what isn't",
+    ],
+  },
+  {
+    role: "progress-without-deadlines",
+    title: "Progress Without\nDeadlines",
+    subtitle: "The 3-3-3 rule is a guide, not a deadline. Every dog moves at their own pace.",
+    items: [
       "Sign of progress: taking treats gently from your hand",
-      "Sign of progress: choosing to be in the same room as you",
+      "Sign of progress: choosing to be in the same room as you, unprompted",
       "Sign of progress: a relaxed body — soft eyes, loose tail, normal breathing",
-      "Sign of progress: a full-body shake-off after stress (a great sign!)",
-      "Sign of progress: seeking you out for comfort",
+      "Sign of progress: a full-body shake-off after something stressful (a great sign!)",
+      "Sign of progress: seeking you out for comfort or attention",
+      "Sign of progress: playful moments, even short or clumsy ones",
+      "Reminder: setbacks are normal and don't erase progress already made",
+      "Reminder: \"on their own timeline\" is a real strategy, not a lack of one",
+      "Gave yourself credit for the patience this journey has taken",
     ],
   },
 ];
 
 const IMPORTANT_INFO_LINES = [
-  "This is an organizational tool, not veterinary or professional training advice.",
+  "This is an organizational tool, not veterinary or professional training advice or a medical diagnosis.",
   "Every dog adjusts at their own pace — treat these as gentle guidelines, not a strict schedule.",
-  "For behavioral concerns, please consult a certified trainer or your veterinarian.",
+  "For behavioral or health concerns, please consult a certified trainer or your veterinarian.",
   "Instant digital download — no physical item will be shipped.",
 ];
 
@@ -206,7 +334,7 @@ async function main() {
       const node = buildChecklistNode({ title: page.title, subtitle: page.subtitle, items: page.items, palette }, widthPx, heightPx);
       const svg = await renderToSvg(node, { widthPx, heightPx, fonts });
       const png = rasterizeSvgToPng(svg);
-      pngs.push({ role: `0${i + 1}-${page.role}`, buffer: png });
+      pngs.push({ role: `${String(i + 1).padStart(2, "0")}-${page.role}`, buffer: png });
       allTechnicalIssues.push(
         ...(await checkImageTechnical({ buffer: png, expectedWidthIn: size.widthIn, expectedHeightIn: size.heightIn, label: `${page.role} (${size.id})` })),
       );
@@ -276,16 +404,22 @@ This is a digital product. No physical item will be mailed to you.
   console.log(`2. Customer bundle written: ${zipEntries.length} files zipped, ${customerFiles.PDF.length} convenience PDFs\n`);
 
   // --- 3. SEO copy (written directly for this listing — see AI disclosure) ---
+  // usedAiText: true is accurate for BOTH the listing description below AND
+  // this product's own checklist page text (checklistPages above) — all of
+  // that written content was drafted with AI assistance. The page layout,
+  // typography, and rendering are deterministic (satori/resvg), not AI —
+  // see packages/qa/src/config/ai-disclosure-policy.json for the exact,
+  // re-verified wording this maps to.
   const aiDisclosureLine = buildAiDisclosureText({ usedAiText: true, usedAiImages: false });
   const title = truncate(
-    "3-3-3 Rescue Dog Decompression Tracker | Printable Adjustment Checklist for New Shelter Dogs | Instant Download PDF",
+    "3-3-3 Rescue Dog Adjustment Bundle | 12-Page Printable Planner for New Shelter & Rescue Dogs | Instant Download PDF",
     LISTING_LIMITS.maxTitleLength,
   );
   const description = [
-    `Just brought home a rescue or shelter dog? The first 3 months are the hardest to navigate — and this tracker turns the widely-recommended "3-3-3 rule" (3 days, 3 weeks, 3 months) into a simple, printable guide so you always know what's normal and what to focus on next.`,
-    `Instead of one generic checklist, you get 5 focused pages: a Days 1-3 decompression log, a Weeks 1-3 routine-building checklist, a Months 1-3 settling-in checklist, and a Safe Space Setup + Signs of Progress quick-reference — so you're never left wondering "is this normal?" during the adjustment period.`,
+    `Just brought home a rescue or shelter dog? The first 3 months are the hardest to navigate — and this bundle turns the widely-recommended "3-3-3 rule" (3 days, 3 weeks, 3 months) into a complete, printable system so you always know what's normal and what to focus on next.`,
+    `This isn't a single checklist — it's a full 12-page adjustment system covering the parts most trackers skip: a First 72 Hours calm-home plan, a Safe Space setup guide, a Daily Routine Builder, a Food/Water/Sleep watch list, a Trigger & Comfort log, a First 3 Days reflection page, Week 1-3 and Month 1-3 trackers, a Questions-for-Vet-or-Trainer prep page, a New Home Emergency Information sheet, a Family Consistency sheet for multi-person households, and a Progress Without Deadlines page so you never feel behind schedule.`,
     `What's included:`,
-    `- 4 checklist pages (Days 1-3 / Weeks 1-3 / Months 1-3 / Safe Space & Signs of Progress) plus a title page`,
+    `- 12 focused pages plus a title page (13 pages total), covering setup, daily routine, observation logs, reflection, vet/trainer prep, emergency info, and family alignment`,
     `- 2 print sizes: US Letter and A4, so it prints cleanly no matter where you live`,
     `- Delivered as a print-ready PDF (all pages together) and individual PNG pages, zipped into one download`,
     `- A short printing guide and personal-use license included`,
@@ -304,7 +438,7 @@ This is a digital product. No physical item will be mailed to you.
     "decompression",
     "shelter dog",
     "new dog owner",
-    "dog checklist",
+    "dog adjustment",
     "printable pdf",
     "pet planner",
     "foster dog",
@@ -321,7 +455,7 @@ This is a digital product. No physical item will be mailed to you.
   const materials = ["Digital File", "PDF", "PNG"];
   const attributes = { occasion: "New pet", style: "Minimalist", recipient: "Pet owner", color: "Sage green", primaryColor: "Green" };
   const category = "pet_supplies_printable"; // see docs/ETSY_SETUP.md step 6 — real taxonomy_id fetched after OAuth connects, never guessed
-  const priceUsd = 6.5;
+  const priceUsd = 8.5; // see listing-data/etsy-price.txt — only valid IF the connected shop's currency is USD; never state this figure blind against a non-USD shop
 
   console.log(`3. SEO copy drafted: title (${title.length} chars), ${tags.length} tags, description (${description.length} chars)\n`);
 
@@ -345,7 +479,7 @@ This is a digital product. No physical item will be mailed to you.
         {
           title: "What's Included",
           bullets: [
-            "5 pages: Title page + 4 focused checklists (Days 1-3, Weeks 1-3, Months 1-3, Safe Space & Signs)",
+            "13 pages: title page + 12 focused planner pages covering setup, routine, logs, and reflection",
             "1 print-ready PDF per paper size, plus individual PNG pages",
             "2 sizes included: US Letter and A4",
             "Printing guide + personal use license",
@@ -364,7 +498,7 @@ This is a digital product. No physical item will be mailed to you.
           title: "Features & Benefits",
           bullets: [
             "Structured around the widely-recommended 3-3-3 adjustment framework",
-            "Covers the whole first 3 months, not just move-in day",
+            "Covers the whole first 3 months — setup, routine, logs, vet/trainer prep, and family alignment",
             "A calm, judgment-free way to track what's normal",
             "Reusable for every future foster or rescue dog",
           ],
@@ -497,13 +631,34 @@ This is a digital product. No physical item will be mailed to you.
   await writeFile(path.join(OUT_DIR, "listing-data", "etsy-tags.txt"), tags.join("\n"), "utf8");
   await writeFile(
     path.join(OUT_DIR, "listing-data", "etsy-category.txt"),
-    `${category}\n\n(This is a category HINT for the human publisher, not a numeric taxonomy_id — the autopilot system never guesses one; see docs/ETSY_SETUP.md step 6 for how it's fetched for real once OAuth is connected. In Etsy's listing editor, type into the category search field and pick the closest match: try "Pet Supplies" first and narrow to a digital/printable pet planner or tracker subcategory if Etsy offers one; if not, "Craft Supplies & Tools > Paper & Party Supplies > Printables" is the right fallback for a printable digital download like this one.)\n`,
+    `${category}\n\n(This is a category HINT for the human publisher, not a numeric taxonomy_id — the autopilot system never guesses one; see docs/ETSY_SETUP.md step 6 for how it's fetched for real once OAuth is connected. Do NOT force this into an unrelated craft-supply category just because it's digital. In Etsy's listing editor, type a description of the actual product — e.g. "pet adjustment planner" or "dog printable" — into the category search field and Etsy will suggest real, current categories live. Pick whichever suggested category is the closest match to this specific listing at the time you create it; Etsy's own category taxonomy can change, so trust its live suggestions over this hint.)\n`,
     "utf8",
   );
-  await writeFile(path.join(OUT_DIR, "listing-data", "etsy-price.txt"), `${priceUsd.toFixed(2)} USD\n`, "utf8");
+  await writeFile(
+    path.join(OUT_DIR, "listing-data", "etsy-price.txt"),
+    `${priceUsd.toFixed(2)} (only valid if the connected Etsy shop's currency is USD)\n\nThis figure is a reference price computed in USD. Etsy's price field has no currency parameter on write — it always uses whatever currency the shop itself is set to. Before entering a price:\n1. Check the shop's currency in Etsy Shop Manager > Finances > Payment account (or Settings).\n2. If the shop currency is USD, enter ${priceUsd.toFixed(2)}.\n3. If the shop currency is anything other than USD (e.g. TRY), do NOT enter ${priceUsd.toFixed(2)} as the number — that would be the wrong amount in the wrong currency. Convert ${priceUsd.toFixed(2)} USD to the shop's currency at a current exchange rate first, then enter that converted amount.\n`,
+    "utf8",
+  );
   await writeFile(
     path.join(OUT_DIR, "listing-data", "etsy-attributes.json"),
-    JSON.stringify({ ...attributes, materials, who_made: "i_did", when_made: "made_to_order", type: "download", quantity: 999, should_auto_renew: true }, null, 2),
+    JSON.stringify(
+      {
+        ...attributes,
+        materials,
+        who_made: "i_did",
+        // "made_to_order" is ONLY for items specially made after a specific
+        // customer's order — this is a pre-rendered, ready-made instant
+        // download, so it must use the real date-range value covering when
+        // it was actually created (see packages/etsy/src/types.ts
+        // EtsyWhenMade for the full enum, verified against Etsy's live API).
+        when_made: "2020_2026",
+        type: "download",
+        quantity: 999,
+        should_auto_renew: true,
+      },
+      null,
+      2,
+    ),
     "utf8",
   );
 

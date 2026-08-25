@@ -9,9 +9,9 @@ under the cap.
 1. `customer-download/333-rescue-dog-decompression-tracker-complete-bundle.zip`
    (the full bundle — every PNG page in both sizes + both PDFs + instructions.txt + license.txt)
 2. `customer-download/333-rescue-dog-decompression-tracker-letter.pdf`
-   (convenience: US Letter, all 5 pages, print-ready as one file)
+   (convenience: US Letter, all 13 pages, print-ready as one file)
 3. `customer-download/333-rescue-dog-decompression-tracker-a_series.pdf`
-   (convenience: A4, all 5 pages, print-ready as one file)
+   (convenience: A4, all 13 pages, print-ready as one file)
 
 ## Listing images (Etsy "Photos" section) — upload in this exact order (01 → 09)
 
@@ -35,9 +35,9 @@ All 9 are 2000x2000px PNGs (Etsy's recommended square listing-image size).
 - `etsy-title.txt` — paste verbatim into the Title field
 - `etsy-description.txt` — paste verbatim into the Description field
 - `etsy-tags.txt` — one tag per line, 13 total; add each as a separate Etsy tag
-- `etsy-category.txt` — a category hint + how to pick it in Etsy's UI (see the note in the file — this is not a numeric taxonomy_id)
-- `etsy-price.txt` — the price to set
-- `etsy-attributes.json` — suggested listing attributes (occasion/style/recipient/color) and the write-contract fields (`who_made`, `when_made`, `type`, `quantity`) for reference against what the autopilot will eventually send via the API
+- `etsy-category.txt` — a category hint + how to pick it live from Etsy's own suggestions (not a numeric taxonomy_id, and no hardcoded fallback category)
+- `etsy-price.txt` — a USD reference price PLUS the rule for checking the shop's live currency before entering any number
+- `etsy-attributes.json` — suggested listing attributes (occasion/style/recipient/color) and the write-contract fields (`who_made`, `when_made`, `type`, `quantity`) for reference against what the autopilot will eventually send via the API — `when_made` is a real date-range value (not "made_to_order"), since this is a ready-made instant download
 
 ## QA / verification record
 
@@ -47,5 +47,7 @@ listing's files and copy: overall score 100/100 (bar: ≥95), IP risk 0/100
 
 ## Why this product
 
-`WHY_THIS_PRODUCT.json` — the research and scoring behind picking this as
-the first product, including the 4 other candidates considered and rejected.
+`WHY_THIS_PRODUCT.json` — the research and scoring behind this product,
+rebuilt after the user's independent competitive check found real, named
+direct competitors on Etsy — includes those 4 named competitors and the
+specific content-scope differentiation against each.

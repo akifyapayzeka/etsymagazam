@@ -16,13 +16,41 @@ export interface EtsyShop {
  */
 export type EtsyListingType = "physical" | "download" | "both";
 
+/**
+ * Real Etsy `when_made` enum (verified against the live createDraftListing
+ * contract). "made_to_order" means the item is specially made after a
+ * specific customer's order — it must NOT be used for a pre-rendered,
+ * ready-made digital download. Every other value is a date range for when
+ * the item was actually made/created.
+ */
+export type EtsyWhenMade =
+  | "made_to_order"
+  | "2020_2026"
+  | "2010_2019"
+  | "2007_2009"
+  | "before_2007"
+  | "2000_2006"
+  | "1990s"
+  | "1980s"
+  | "1970s"
+  | "1960s"
+  | "1950s"
+  | "1940s"
+  | "1930s"
+  | "1920s"
+  | "1910s"
+  | "1900s"
+  | "1800s"
+  | "1700s"
+  | "before_1700";
+
 export interface CreateDraftListingInput {
   quantity: number;
   title: string;
   description: string;
   price: number; // major currency unit, e.g. 4.99
   who_made: "i_did" | "someone_else" | "collective";
-  when_made: string; // e.g. "made_to_order"
+  when_made: EtsyWhenMade;
   taxonomy_id: number;
   type: EtsyListingType;
   tags?: string[];

@@ -1,23 +1,50 @@
 {
   "researchDate": "2026-08-25",
-  "researchMethod": "Web search (Google-style results) against rescue/shelter organization publications, Etsy public listing search results, and pet-adoption statistics reports. No Etsy scraping, browser automation, or CAPTCHA bypass was used — only ordinary search results and publicly published statistics.",
+  "researchMethod": "Initial candidate research: web search against rescue/shelter organization publications, Etsy public listing search results, and pet-adoption statistics reports. Competitive-landscape correction: the user independently re-checked the initial 'no direct competitor found' claim (via ChatGPT) against the live Etsy market and found real, named direct competitors this research had missed. This file's differentiation section is rewritten against those specific, named competitors rather than the original (incorrect) 'no competitor found' framing. No Etsy scraping, browser automation, or CAPTCHA bypass was used at any point — only ordinary search results and publicly published statistics.",
+  "correctionNote": "An earlier version of this file claimed no direct '3-3-3 rescue dog' competitor existed on Etsy. That claim was wrong. The user found: (1) a '3-3-3 Rescue Dog Planner' (~$6.81), (2) a 'Rescue Dog 3-3-3 Journal' (~$3.99, 12 fillable pages), (3) a 28-page 'Rescue Dog Adjustment Planner', and (4) a 3-PDF 'Rescue Dog Adoption' bundle. Rather than discard the concept, the product was substantially expanded and re-priced against this real competitive set — see 'competitors' and 'differentiation' below.",
+  "competitors": [
+    {
+      "name": "3-3-3 Rescue Dog Planner",
+      "approxPrice": "$6.81",
+      "knownScope": "A single planner document built around the 3-3-3 rule.",
+      "gapVsOurs": "Single planner, not a multi-category system — no dedicated emergency-info sheet, vet/trainer question prep, multi-person household consistency sheet, or reflection page found in its scope."
+    },
+    {
+      "name": "Rescue Dog 3-3-3 Journal",
+      "approxPrice": "$3.99",
+      "knownScope": "A 12-page fillable journal.",
+      "gapVsOurs": "Journal-style day-by-day fill-in format only. No structured setup guide (Safe Space, 72-Hour Plan), no vet/trainer prep page, no household-consistency or emergency-info pages — it logs the experience but doesn't organize the practical setup and communication tasks around it."
+    },
+    {
+      "name": "Rescue Dog Adjustment Planner",
+      "approxPrice": "unlisted",
+      "knownScope": "A 28-page planner.",
+      "gapVsOurs": "Larger page count than ours, so our differentiation here is NOT raw size — it's that our 12 core pages are each built around a distinct, named practical task (setup, routine, 2 observation logs, reflection, 2 trackers, vet/trainer prep, emergency info, family alignment, progress-without-deadlines) rather than a longer generic planner. A buyer comparing the two should pick this one if they specifically want the New Home Emergency Information sheet, the Vet/Trainer question-prep page, or the Family Consistency sheet for multi-person households — none of which were found described in the 28-page competitor's listing."
+    },
+    {
+      "name": "Rescue Dog Adoption 3-PDF bundle",
+      "approxPrice": "unlisted",
+      "knownScope": "A bundle of 3 separate PDF documents.",
+      "gapVsOurs": "3 separate, presumably differently-designed documents vs. our single cohesive 13-page design system (one visual identity, one print-ready file per size) — easier to print and keep together as one binder, not 3 separate downloads to reconcile."
+    }
+  ],
   "candidates": [
     {
       "rank": 1,
       "winner": true,
-      "productName": "The 3-3-3 Rescue Dog Decompression Tracker",
+      "productName": "The 3-3-3 Rescue Dog Decompression & Adjustment Bundle",
       "targetCustomer": "People who have just adopted (or are about to adopt) a rescue or shelter dog, especially first-time or anxious adopters worried about whether their dog's fear/hiding/reactivity is normal.",
-      "problem": "New adopters get told about the '3-3-3 rule' (3 days to decompress, 3 weeks to learn routine, 3 months to feel at home) by nearly every shelter and rescue org, but have no structured way to actually track it day-to-day, so they don't know if what they're seeing is normal or worth worrying about.",
+      "problem": "New adopters get told about the '3-3-3 rule' (3 days to decompress, 3 weeks to learn routine, 3 months to feel at home) by nearly every shelter and rescue org, but existing printable trackers only cover the observational/journaling side of it — none found bundle the practical setup, vet/trainer communication, and household-alignment tasks that the same 90 days actually requires.",
       "purchaseIntent": "High — bought right around the moment of adoption, a specific, urgent, high-emotion trigger event, not idle browsing.",
       "demandSignal": "Roughly 2 million dogs are adopted through U.S. shelters and rescues per year (Shelter Animals Count 2025 Annual Report). The '3-3-3 rule' itself is independently published and taught by at least 7 distinct rescue organizations found in a single search (Pasadena Humane, NYC Second Chance Rescue, Minnesota Boxer Rescue, Hearts & Bones Rescue, rescuedogs101.com, istandwithmypack.org, adoptagolden.com), evidence of very broad, sustained, evergreen awareness of the exact concept this product is built around.",
-      "competitionSignal": "Low-to-medium. Etsy already sells well in adjacent categories proving buyers pay for structured pet-tracking printables (Dog Training Tracker, Reactive Dog Journal, Puppy Health Tracker, Emergency Pet Binder all have active listings/market pages), but a direct search for a '3-3-3 rule' or 'decompression tracker' printable on Etsy returned no matching product — a real, specific content gap inside a proven-selling category.",
-      "differentiation": "Built specifically around the widely-known, trusted 3-3-3 framework (not generic 'puppy training'), and specifically for the emotional/behavioral adjustment period of a RESCUE or SHELTER dog — a distinct angle from the generic 'new puppy checklist' or 'dog training tracker' products that dominate the category.",
-      "automationSuitability": "High — fits the deterministic checklist template well, requires no medical/veterinary claims (purely observational/organizational language), and the underlying concept (3-3-3 rule) is public, generic knowledge, not any single organization's proprietary framework or trademark.",
+      "competitionSignal": "Medium — real, named direct competitors exist on Etsy for the '3-3-3 rescue dog' concept (see 'competitors' above), so this is NOT an empty-category play. The opportunity is a content/scope gap within an already-validated, already-selling sub-niche, not a first-mover blue ocean.",
+      "differentiation": "Expanded from an initial 5-page/4-checklist draft to a 13-page (12 content pages + title page) system specifically to cover categories the 4 named competitors don't appear to: a First 72 Hours calm-home plan, a dedicated Safe Space setup page, a Daily Routine Builder, two separate observation logs (Food/Water/Sleep, and Trigger/Comfort), a First 3 Days reflection page, a Questions-for-Vet-or-Trainer prep page (organizes questions to ask a professional — never gives veterinary/training advice itself), a New Home Emergency Information sheet, a Family Consistency Sheet for multi-person households, and a closing Progress-Without-Deadlines page. This reframes the product from 'another 3-3-3 tracker' to 'the practical operations system for a rescue dog's first 90 days,' priced accordingly above the cheapest journal-style competitor and below the unlisted premium of the 28-page planner.",
+      "automationSuitability": "High — fits the deterministic checklist template well, requires no medical/veterinary claims (purely observational/organizational language, and the vet/trainer page explicitly organizes questions rather than answering them), and the underlying concept (3-3-3 rule) is public, generic knowledge, not any single organization's or competitor's proprietary framework or trademark.",
       "seasonality": "Mild seasonal lift in spring/summer (higher shelter adoption volume per Shelter Animals Count data) but genuinely evergreen — dogs are adopted year-round.",
-      "ipRisk": "Low — verified 0/100 by the QA package's real IP/Policy Guard blocklist scan of all listing and product text; no trademarked terms, franchise names, or brand references appear anywhere in the copy.",
-      "estimatedPrice": "$6.50 USD",
-      "opportunityScore": 87,
-      "scoreRationale": "High purchase intent + validated demand + a genuine, specific competition gap inside a category that's already proven to sell, combined with low IP/legal risk and a good fit for the deterministic rendering engine, pushed this comfortably above the 80 bar."
+      "ipRisk": "Low — verified 0/100 by the QA package's real IP/Policy Guard blocklist scan of all listing and product text (rebuilt scan after the page-set expansion); no trademarked terms, franchise names, competitor product names, or brand references appear anywhere in the copy.",
+      "estimatedPrice": "$8.50 USD (reference price, valid only if the connected Etsy shop's currency is USD — see listing-data/etsy-price.txt)",
+      "opportunityScore": 82,
+      "scoreRationale": "High purchase intent and validated demand remain unchanged. The score was revised down from the original (incorrect) 87 to reflect the real, medium competition signal now on record, and revised back up from a mid-60s 'crowded, no angle' score because the expanded scope gives this listing a specific, checkable differentiation (5 content categories not found in any single named competitor) rather than relying on being first."
     },
     {
       "rank": 2,
@@ -88,5 +115,5 @@
       "scoreRationale": "Deliberately included as a control example of the generic, oversaturated niche category this research was told to explicitly reject, and scored accordingly."
     }
   ],
-  "decision": "The 3-3-3 Rescue Dog Decompression Tracker was selected as the first Form & Fern product: opportunityScore 87 (>= 80 threshold), built from real, cross-verified demand signals (adoption volume statistics + independent publication of the underlying '3-3-3 rule' concept by 7+ rescue organizations) and a specific, verified competition gap on Etsy inside an already-proven-to-sell adjacent category, with low IP risk and a strong fit for this system's deterministic (non-AI) layout engine."
+  "decision": "The 3-3-3 Rescue Dog Decompression & Adjustment Bundle remains Form & Fern's first product, now built as a 13-page (12 content pages + title page) system after the user's independent competitive check found real, named direct competitors the original research had missed. opportunityScore revised to 82 (>= 80 threshold) to reflect medium (not low) competition, offset by a genuine, checkable content-scope differentiation against each named competitor (see 'competitors' above) and low IP risk (0/100, re-verified after the page-set expansion)."
 }

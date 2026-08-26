@@ -1,5 +1,9 @@
 # Build from the repo root: docker build -f apps/worker/Dockerfile -t etsymagazam-worker .
 FROM node:22-alpine
+# See apps/api/Dockerfile for why this is here — without it Prisma
+# mis-detects Alpine's OpenSSL and tries a runtime engine fetch that fails
+# once USER node drops privileges below.
+RUN apk add --no-cache openssl
 RUN corepack enable
 WORKDIR /repo
 

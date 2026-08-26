@@ -17,7 +17,12 @@
 # starts the stack; verifies both public HTTPS URLs itself over real
 # requests before declaring success.
 #
-# Safe to re-run — anything already answered/generated is kept as-is.
+# Once the questions are answered, the rest runs DETACHED from this
+# terminal (via setsid) so a dropped SSH/browser connection can't kill it
+# mid-deploy — reconnect any time and run `tail -f /opt/etsy-autopilot/deploy.log`
+# to see where it's at.
+#
+# Safe to re-run — anything already answered/generated/deployed is kept as-is.
 set -euo pipefail
 
 PROJECT_DIR="/opt/etsy-autopilot"
@@ -116,61 +121,98 @@ fi
 
 chmod 600 .env
 
-echo "== 5/9  Building api image (also used to hash the admin password) =="
-$COMPOSE build api
+# ---------------------------------------------------------------------------
+# Everything from here on (builds, migration, starting the stack, HTTPS
+# verification) runs detached from this terminal via `setsid`, in its own
+# session. Three live attempts in a row died at the exact same point (right
+# after the migration step) when the mobile browser-based SSH/web-terminal
+# session dropped — screen lock, tab backgrounding, or a network hiccup all
+# tear down the controlling terminal, which otherwise kills this whole
+# script via SIGHUP. `setsid` makes the deploy immune to that: it keeps
+# running on the VPS even if this terminal disappears completely. We still
+# tail the log live below for as long as the connection lasts.
+# ---------------------------------------------------------------------------
+run_deploy() {
+  set -euo pipefail
+  echo "== 5/9  Building api image (also used to hash the admin password) =="
+  $COMPOSE build api
 
-if [ "$NEED_PASSWORD_HASH" = "1" ]; then
-  echo "  Hashing dashboard password with bcryptjs inside the built api image..."
-  ADMIN_PASSWORD_HASH=$(printf '%s' "$ADMIN_PASSWORD_PLAIN" | docker run --rm -i \
-    --workdir /repo/apps/api --entrypoint node "$API_IMAGE" -e '
-      const bcrypt = require("bcryptjs");
-      let data = "";
-      process.stdin.on("data", (c) => { data += c; });
-      process.stdin.on("end", () => {
-        process.stdout.write(bcrypt.hashSync(data, 12));
-      });
-    ')
-  unset ADMIN_PASSWORD_PLAIN
-  echo "ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}" >> .env
-  chmod 600 .env
-  echo "  Password hashed and stored — the plain password was never written to .env, a log, or shell history."
-fi
-
-echo "== 6/9  Building worker, dashboard, and migrate (one at a time) =="
-$COMPOSE build worker
-$COMPOSE build dashboard
-# migrate shares api's Dockerfile/context but is a separate compose image
-# (etsy-autopilot-migrate) — `docker compose run` reuses a stale cached
-# image instead of picking up a newer Dockerfile automatically, so it must
-# be rebuilt explicitly every run (fast: shares api's cached layers).
-$COMPOSE build migrate
-
-echo "== 7/9  Running database migration =="
-# -T: no pseudo-TTY for this one-off container — migrate needs no
-# interactive input, and allocating a nested TTY here has been observed to
-# kill the outer SSH/web-terminal session right as the container exits.
-$COMPOSE run --rm -T migrate
-
-echo "== 8/9  Starting the stack =="
-$COMPOSE up -d
-
-echo "== 9/9  Verifying HTTPS (this can take a couple of minutes for TLS issuance) =="
-VERIFIED=0
-for _ in $(seq 1 25); do
-  if curl -fsS --max-time 5 "${API_URL}/health" >/dev/null 2>&1 \
-    && curl -fsS --max-time 5 -o /dev/null "${DASHBOARD_URL}"; then
-    VERIFIED=1
-    break
+  if [ "${NEED_PASSWORD_HASH:-0}" = "1" ]; then
+    echo "  Hashing dashboard password with bcryptjs inside the built api image..."
+    ADMIN_PASSWORD_HASH=$(printf '%s' "$ADMIN_PASSWORD_PLAIN" | docker run --rm -i \
+      --workdir /repo/apps/api --entrypoint node "$API_IMAGE" -e '
+        const bcrypt = require("bcryptjs");
+        let data = "";
+        process.stdin.on("data", (c) => { data += c; });
+        process.stdin.on("end", () => {
+          process.stdout.write(bcrypt.hashSync(data, 12));
+        });
+      ')
+    echo "ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}" >> .env
+    chmod 600 .env
+    echo "  Password hashed and stored — the plain password was never written to .env, a log, or shell history."
   fi
-  sleep 6
-done
 
-if [ "$VERIFIED" != "1" ]; then
-  echo "HTTPS verification did not succeed in time. Check: docker compose -p etsy-autopilot logs" >&2
-  exit 1
-fi
+  echo "== 6/9  Building worker, dashboard, and migrate (one at a time) =="
+  $COMPOSE build worker
+  $COMPOSE build dashboard
+  # migrate shares api's Dockerfile/context but is a separate compose image
+  # (etsy-autopilot-migrate) — `docker compose run` reuses a stale cached
+  # image instead of picking up a newer Dockerfile automatically, so it
+  # must be rebuilt explicitly every run (fast: shares api's cached layers).
+  $COMPOSE build migrate
 
+  echo "== 7/9  Running database migration =="
+  $COMPOSE run --rm -T migrate
+
+  echo "== 8/9  Starting the stack =="
+  $COMPOSE up -d
+
+  echo "== 9/9  Verifying HTTPS (this can take a couple of minutes for TLS issuance) =="
+  VERIFIED=0
+  for _ in $(seq 1 40); do
+    if curl -fsS --max-time 5 "${API_URL}/health" >/dev/null 2>&1 \
+      && curl -fsS --max-time 5 -o /dev/null "${DASHBOARD_URL}"; then
+      VERIFIED=1
+      break
+    fi
+    sleep 6
+  done
+
+  if [ "$VERIFIED" != "1" ]; then
+    echo "HTTPS verification did not succeed in time. Check: docker compose -p etsy-autopilot logs" >&2
+    exit 1
+  fi
+
+  echo ""
+  echo "DEPLOY SUCCESS"
+  echo "${API_URL}/health"
+  echo "${DASHBOARD_URL}"
+}
+export -f run_deploy
+export COMPOSE API_IMAGE API_URL DASHBOARD_URL NEED_PASSWORD_HASH
+[ -n "${ADMIN_PASSWORD_PLAIN:-}" ] && export ADMIN_PASSWORD_PLAIN
+
+LOG="$PROJECT_DIR/deploy.log"
+: > "$LOG"
 echo ""
-echo "DEPLOY SUCCESS"
-echo "${API_URL}/health"
-echo "${DASHBOARD_URL}"
+echo "Handing off to a detached background process — this now survives a"
+echo "dropped connection. If your terminal disconnects, just reconnect and run:"
+echo "    tail -f ${LOG}"
+echo "or simply re-run this same one-liner (safe to repeat)."
+echo ""
+
+setsid bash -c 'run_deploy' < /dev/null > "$LOG" 2>&1 &
+BGPID=$!
+disown "$BGPID" 2>/dev/null || true
+unset ADMIN_PASSWORD_PLAIN
+
+tail -f "$LOG" --pid="$BGPID" 2>/dev/null &
+TAILPID=$!
+
+DEPLOY_EXIT=0
+wait "$BGPID" || DEPLOY_EXIT=$?
+kill "$TAILPID" 2>/dev/null || true
+wait "$TAILPID" 2>/dev/null || true
+
+exit "$DEPLOY_EXIT"

@@ -136,9 +136,14 @@ if [ "$NEED_PASSWORD_HASH" = "1" ]; then
   echo "  Password hashed and stored — the plain password was never written to .env, a log, or shell history."
 fi
 
-echo "== 6/9  Building worker and dashboard (one at a time) =="
+echo "== 6/9  Building worker, dashboard, and migrate (one at a time) =="
 $COMPOSE build worker
 $COMPOSE build dashboard
+# migrate shares api's Dockerfile/context but is a separate compose image
+# (etsy-autopilot-migrate) — `docker compose run` reuses a stale cached
+# image instead of picking up a newer Dockerfile automatically, so it must
+# be rebuilt explicitly every run (fast: shares api's cached layers).
+$COMPOSE build migrate
 
 echo "== 7/9  Running database migration =="
 $COMPOSE run --rm migrate

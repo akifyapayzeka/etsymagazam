@@ -37,6 +37,7 @@ export default function SettingsPage() {
   async function togglePause() {
     if (!state) return;
     setSaving(true);
+    setMessage(null);
     try {
       if (state.isPaused) {
         await apiFetch("/api/dashboard/autopilot/resume", { method: "POST" });
@@ -44,6 +45,8 @@ export default function SettingsPage() {
         await apiFetch("/api/dashboard/autopilot/pause", { method: "POST", body: JSON.stringify({ reason: "Paused from dashboard" }) });
       }
       load();
+    } catch {
+      setMessage("Failed to update autopilot state.");
     } finally {
       setSaving(false);
     }
@@ -110,6 +113,7 @@ export default function SettingsPage() {
             {state.isPaused ? "Resume Autopilot" : "Pause Autopilot"}
           </button>
           {state.isPaused && state.pausedReason && <p className="mt-2 text-xs text-stone-400">{state.pausedReason}</p>}
+          {message && <p className="mt-2 text-xs text-red-600">{message}</p>}
         </section>
 
         <section className="rounded-lg border border-stone-200 bg-white p-6">

@@ -33,15 +33,33 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
       maxAge: 60 * 10,
     });
 
+    const scopes = env.ETSY_OAUTH_SCOPES.split(",").map((s) => s.trim()) as unknown as typeof DEFAULT_OAUTH_SCOPES;
     const url = buildAuthorizeUrl({
       clientId: env.ETSY_API_KEYSTRING,
       redirectUri: env.ETSY_OAUTH_REDIRECT_URI,
       state,
       codeChallenge,
-      scopes: env.ETSY_OAUTH_SCOPES.split(",").map((s) => s.trim()) as unknown as typeof DEFAULT_OAUTH_SCOPES,
+      scopes,
     });
 
-    return { authorizeUrl: url };
+    // Temporary diagnostic for the "application not recognized" investigation.
+    // Never includes ETSY_SHARED_SECRET — client_id is Etsy's public OAuth
+    // identifier (it's meant to appear in the browser URL), so surfacing it
+    // (even in full) here is not a secret leak; only the first/last 4 chars
+    // are included anyway to make eyeballing a stray space/typo easy.
+    // Remove this `debug` block once OAuth is confirmed working end-to-end.
+    const keystring = env.ETSY_API_KEYSTRING;
+    return {
+      authorizeUrl: url,
+      debug: {
+        clientIdLength: keystring.length,
+        clientIdFirst4: keystring.slice(0, 4),
+        clientIdLast4: keystring.slice(-4),
+        redirectUriDecoded: new URL(url).searchParams.get("redirect_uri"),
+        scope: scopes.join(" "),
+        codeChallengeLength: codeChallenge.length,
+      },
+    };
   });
 
   /** Step 2: Etsy redirects the browser back here after you approve access. */

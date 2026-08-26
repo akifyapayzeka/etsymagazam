@@ -30,7 +30,13 @@ export interface AccessTokenProvider {
 
 export interface EtsyApiClientOptions {
   apiKeystring: string;
-  /** Etsy's "Shared secret" from the Developer Portal. Required — the x-api-key header is `keystring:sharedSecret`, not the keystring alone. */
+  /**
+   * Etsy's "Shared secret" from the Developer Portal. NOT used to build the
+   * x-api-key header — that's the keystring alone (see below). Kept as a
+   * required option so call sites keep threading it through for webhook
+   * signature verification and any future use, but this client itself
+   * doesn't touch it.
+   */
   sharedSecret: string;
   tokenProvider: AccessTokenProvider;
   shopId: string;
@@ -54,9 +60,6 @@ export class EtsyApiClient {
   private readonly maxRetries: number;
 
   constructor(private readonly opts: EtsyApiClientOptions) {
-    if (!opts.sharedSecret) {
-      throw new Error("EtsyApiClient requires sharedSecret (Etsy's x-api-key header is keystring:sharedSecret, not the keystring alone).");
-    }
     this.limiter = new RateLimiter(RATE_LIMITS.queriesPerSecond, RATE_LIMITS.queriesPerDay);
     this.fetchImpl = opts.fetchImpl ?? fetch;
     this.maxRetries = opts.maxRetries ?? 4;
@@ -168,8 +171,16 @@ export class EtsyApiClient {
       attempt += 1;
       await this.limiter.acquire();
 
+      // Etsy Open API v3's x-api-key is the keystring alone — NOT
+      // `keystring:sharedSecret`. Sending the concatenated form here is
+      // exactly what produces a 403 "Invalid API credentials" with the
+      // misleading "must include 'keystring:secret'" message (see
+      // https://github.com/etsy/open-api/discussions/1521): the whole
+      // colon-joined string doesn't match any registered keystring, so
+      // Etsy rejects the key as invalid/inactive rather than reporting a
+      // malformed header.
       const headers: Record<string, string> = {
-        "x-api-key": `${this.opts.apiKeystring}:${this.opts.sharedSecret}`,
+        "x-api-key": this.opts.apiKeystring,
       };
       if (!opts.skipAuth) {
         const token = await this.opts.tokenProvider.getAccessToken(this.opts.shopId);

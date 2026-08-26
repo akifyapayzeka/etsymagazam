@@ -79,19 +79,14 @@ describe("EtsyApiClient retry/backoff", () => {
 });
 
 describe("EtsyApiClient auth header", () => {
-  it("requires sharedSecret and throws a clear error without it", () => {
-    expect(
-      () =>
-        new EtsyApiClient({
-          apiKeystring: "test-key",
-          sharedSecret: "",
-          shopId: "123",
-          tokenProvider: { getAccessToken: async () => "test-token" },
-        }),
-    ).toThrow(/sharedSecret/);
-  });
-
-  it("sends x-api-key as keystring:sharedSecret, not the keystring alone", async () => {
+  // Etsy Open API v3's x-api-key is the keystring alone. An earlier version
+  // of this client sent `keystring:sharedSecret` (a v2-era/mistaken
+  // convention) — Etsy rejects that as an unrecognized key with a
+  // misleadingly-worded 403 ("Invalid API credentials... must include
+  // 'keystring:secret'"), which reads like a credential typo but is
+  // actually a malformed-header bug. See
+  // https://github.com/etsy/open-api/discussions/1521.
+  it("sends x-api-key as the keystring alone, not keystring:sharedSecret", async () => {
     let capturedHeaders: Headers | undefined;
     const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
       capturedHeaders = new Headers(init?.headers);
@@ -101,7 +96,7 @@ describe("EtsyApiClient auth header", () => {
     const client = makeClient(fetchImpl);
     await client.getShop("1");
 
-    expect(capturedHeaders?.get("x-api-key")).toBe("test-key:test-shared-secret");
+    expect(capturedHeaders?.get("x-api-key")).toBe("test-key");
   });
 });
 

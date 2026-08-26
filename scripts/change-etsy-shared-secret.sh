@@ -26,10 +26,22 @@ fi
 
 read -r -s -p "Etsy Shared Secret (hidden): " secret < "$TTY"
 echo "" > "$TTY"
-secret="$(printf '%s' "$secret" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+# Strip ALL whitespace/control characters anywhere in the value (not just
+# leading/trailing) — a copy-paste can carry an invisible character (a
+# trailing newline, a stray tab, a Windows \r) that a plain trim misses,
+# and a real Etsy shared secret never legitimately contains whitespace.
+secret="$(printf '%s' "$secret" | tr -d '[:space:]')"
 
 if [ -z "$secret" ]; then
   echo "Empty shared secret entered — aborting, .env left unchanged." >&2
+  exit 1
+fi
+
+echo "Entered length: ${#secret} characters — compare this against the Shared Secret shown on Etsy's Developer Portal before continuing." > "$TTY"
+read -r -p "Does that length match? Type 'yes' to continue, anything else to abort: " confirm < "$TTY"
+if [ "$confirm" != "yes" ]; then
+  echo "Aborted — .env left unchanged. Re-run and re-enter the secret." >&2
+  unset secret
   exit 1
 fi
 

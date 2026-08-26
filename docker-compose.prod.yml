@@ -119,6 +119,14 @@ services:
       - traefik.http.routers.etsy-api.entrypoints=websecure
       - traefik.http.routers.etsy-api.tls.certresolver=mytlschallenge
       - traefik.http.services.etsy-api.loadbalancer.server.port=4000
+      # api (unlike dashboard) is on two Docker networks (etsy_internal +
+      # n8n_default, needed for the internal Postgres/Redis/worker traffic).
+      # Without this, Traefik's Docker provider picks a network to reach
+      # the container on its own — and can pick etsy_internal, which
+      # Traefik itself isn't attached to, silently blackholing every
+      # request (TLS handshake succeeds, but the proxied request just
+      # hangs forever). Pin it to the network Traefik actually shares.
+      - traefik.docker.network=n8n_default
 
   worker:
     build:

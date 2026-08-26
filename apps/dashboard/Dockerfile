@@ -12,6 +12,12 @@ RUN pnpm --filter @etsymagazam/dashboard run build
 FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
+# Next's standalone server.js binds to process.env.HOSTNAME when set, and
+# Docker auto-injects HOSTNAME=<container id> into every container — so
+# without this override the app only listens on that container-id hostname,
+# not on 127.0.0.1, and the healthcheck (and Traefik) can't reach it even
+# though the process is up and serving fine.
+ENV HOSTNAME=0.0.0.0
 # next.config.mjs sets outputFileTracingRoot to the monorepo root, so the
 # standalone output mirrors full paths relative to that root (server.js at
 # apps/dashboard/server.js, and traced node_modules split between

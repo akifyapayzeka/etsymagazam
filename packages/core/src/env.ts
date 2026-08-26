@@ -37,6 +37,14 @@ const envSchema = z.object({
   DASHBOARD_BASE_URL: z.string().default("http://localhost:3000"),
   ETSY_OAUTH_REDIRECT_URI: z.string().default("http://localhost:4000/api/etsy/oauth/callback"),
   ETSY_WEBHOOK_URL: z.string().optional().default(""),
+  /**
+   * Parent domain the CSRF cookie is scoped to (e.g. ".studyoafg.com"), so
+   * the dashboard's JS (on a different subdomain than the api) can read it
+   * via document.cookie for the double-submit x-csrf-token header. Leave
+   * unset for local dev (api/dashboard both on localhost — no cross-
+   * subdomain cookie sharing needed there).
+   */
+  COOKIE_DOMAIN: z.string().optional(),
 
   /**
    * Customer-facing brand name — printed on product files, PDFs, the

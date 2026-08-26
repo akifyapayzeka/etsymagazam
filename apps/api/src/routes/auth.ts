@@ -51,6 +51,13 @@ export default async function authRoutes(app: FastifyInstance) {
           sameSite: "lax",
           path: "/",
           maxAge: 60 * 60 * 12,
+          // Without this, the cookie defaults to the api's own host
+          // (etsy-api.studyoafg.com) and the dashboard's JS — running on a
+          // different subdomain (etsy-admin.studyoafg.com) — can never read
+          // it via document.cookie to send the x-csrf-token header, so
+          // every mutating (non-GET) request fails requireCsrf with a 403
+          // that surfaces client-side as an unhandled promise rejection.
+          domain: env.COOKIE_DOMAIN,
         });
 
       return { ok: true, csrfToken };

@@ -92,6 +92,10 @@ services:
       DASHBOARD_BASE_URL: https://etsy-admin.studyoafg.com
       ETSY_OAUTH_REDIRECT_URI: https://etsy-api.studyoafg.com/api/etsy/oauth/callback
       ETSY_WEBHOOK_URL: https://etsy-api.studyoafg.com/api/etsy/webhooks
+      # api and dashboard are on different subdomains — the CSRF cookie must
+      # be scoped to their shared parent domain so the dashboard's JS can
+      # read it (see auth.ts's COOKIE_DOMAIN comment).
+      COOKIE_DOMAIN: .studyoafg.com
       BRAND_DISPLAY_NAME: Form & Fern
       STORAGE_LOCAL_PATH: /repo/storage
       # --- autopilot gate: keep closed until explicitly opened up ---

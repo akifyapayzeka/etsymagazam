@@ -10,6 +10,31 @@ function startOfMonthUtc(d = new Date()): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
 }
 
+function emptySummary() {
+  return {
+    setupRequired: "etsy_shop",
+    today: {
+      orders: 0,
+      revenue: 0,
+      estimatedNet: 0,
+      visitors: null,
+      conversion: null,
+    },
+    autopilot: {
+      productsGenerated: 0,
+      productsPublished: 0,
+      productsRejected: 0,
+      productsOptimized: 0,
+      productsDeactivated: 0,
+      isPaused: true,
+      autoPublish: false,
+      dryRun: true,
+    },
+    winners: [],
+    alerts: [],
+  };
+}
+
 export default async function dashboardRoutes(app: FastifyInstance) {
   app.addHook("preHandler", app.requireAuth);
 
@@ -64,7 +89,7 @@ export default async function dashboardRoutes(app: FastifyInstance) {
   /** The full operator dashboard. */
   app.get("/api/dashboard/summary", async () => {
     const shop = await findCanonicalShop();
-    if (!shop) return { error: "no_shop" };
+    if (!shop) return emptySummary();
 
     const today = startOfDayUtc();
     const [todayMetric, autopilot, alerts, topProducts] = await Promise.all([

@@ -11,10 +11,22 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+
     apiFetch<{ email: string }>("/api/auth/me")
-      .then((res) => setEmail(res.email))
-      .catch(() => router.push("/login"))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        if (!active) return;
+        setEmail(res.email);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        router.replace("/login");
+      });
+
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   return { email, loading };

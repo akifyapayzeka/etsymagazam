@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Nav } from "@/components/Nav";
 import { StatCard } from "@/components/StatCard";
@@ -7,6 +8,7 @@ import { apiFetch } from "@/lib/api-client";
 import { useAuth } from "@/lib/use-auth";
 
 interface Summary {
+  setupRequired?: "etsy_shop";
   today: { orders: number; revenue: number; estimatedNet: number; visitors: number | null; conversion: number | null };
   autopilot: {
     productsGenerated: number;
@@ -36,6 +38,29 @@ export default function DashboardPage() {
       <div>
         <Nav />
         <div className="mx-auto max-w-6xl px-6 py-10 text-stone-500">Loading…</div>
+      </div>
+    );
+  }
+
+  if (summary.setupRequired === "etsy_shop") {
+    return (
+      <div>
+        <Nav />
+        <main className="mx-auto max-w-3xl px-6 py-10">
+          <section className="rounded-lg border border-amber-200 bg-amber-50 p-6">
+            <h1 className="text-lg font-semibold text-ink">Connect your Etsy shop</h1>
+            <p className="mt-2 text-sm leading-6 text-stone-700">
+              The dashboard is running, but no Etsy shop is connected yet. Connect the shop from Settings to start
+              collecting store metrics and enable the autopilot controls.
+            </p>
+            <Link
+              href="/settings"
+              className="mt-5 inline-flex rounded bg-ink px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            >
+              Open Settings
+            </Link>
+          </section>
+        </main>
       </div>
     );
   }

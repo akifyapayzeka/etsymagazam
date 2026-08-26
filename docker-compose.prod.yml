@@ -109,7 +109,7 @@ services:
     mem_limit: 384m
     cpus: 0.5
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      test: ["CMD", "wget", "-qO-", "--timeout=3", "http://127.0.0.1:4000/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -154,7 +154,7 @@ services:
     mem_limit: 384m
     cpus: 0.5
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4100/health"]
+      test: ["CMD", "wget", "-qO-", "--timeout=3", "http://127.0.0.1:4100/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -172,7 +172,7 @@ services:
     mem_limit: 256m
     cpus: 0.25
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "-qO-", "--timeout=3", "http://127.0.0.1:3000/api/health"]
       interval: 15s
       timeout: 5s
       retries: 5

@@ -171,16 +171,15 @@ export class EtsyApiClient {
       attempt += 1;
       await this.limiter.acquire();
 
-      // Etsy Open API v3's x-api-key is the keystring alone — NOT
-      // `keystring:sharedSecret`. Sending the concatenated form here is
-      // exactly what produces a 403 "Invalid API credentials" with the
-      // misleading "must include 'keystring:secret'" message (see
-      // https://github.com/etsy/open-api/discussions/1521): the whole
-      // colon-joined string doesn't match any registered keystring, so
-      // Etsy rejects the key as invalid/inactive rather than reporting a
-      // malformed header.
+      // Confirmed live against Etsy's API: sending the keystring alone gets
+      // an explicit 403 "Shared secret is required in x-api-key header" —
+      // this account/app genuinely requires `keystring:sharedSecret`. (An
+      // earlier pass here guessed the opposite from a GitHub discussion,
+      // which turned out to be wrong; the original "Invalid API
+      // credentials" error was caused by a typo'd keystring, not the
+      // header format. Trust Etsy's live response over any doc/discussion.)
       const headers: Record<string, string> = {
-        "x-api-key": this.opts.apiKeystring,
+        "x-api-key": `${this.opts.apiKeystring}:${this.opts.sharedSecret}`,
       };
       if (!opts.skipAuth) {
         const token = await this.opts.tokenProvider.getAccessToken(this.opts.shopId);

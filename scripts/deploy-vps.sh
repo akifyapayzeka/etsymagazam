@@ -146,7 +146,10 @@ $COMPOSE build dashboard
 $COMPOSE build migrate
 
 echo "== 7/9  Running database migration =="
-$COMPOSE run --rm migrate
+# -T: no pseudo-TTY for this one-off container — migrate needs no
+# interactive input, and allocating a nested TTY here has been observed to
+# kill the outer SSH/web-terminal session right as the container exits.
+$COMPOSE run --rm -T migrate
 
 echo "== 8/9  Starting the stack =="
 $COMPOSE up -d

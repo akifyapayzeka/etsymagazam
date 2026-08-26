@@ -4,6 +4,7 @@ import {
   buildAuthorizeUrl,
   DEFAULT_OAUTH_SCOPES,
   EtsyApiClient,
+  EtsyApiError,
   exchangeCodeForToken,
   extractUserIdFromAccessToken,
   generatePkcePair,
@@ -105,8 +106,20 @@ export default async function etsyOauthRoutes(app: FastifyInstance) {
         shopId: "pending",
         tokenProvider: { getAccessToken: async () => tokenResponse.access_token },
       });
-      const shops = await tempClient.getShopsByOwnerUserId(userId);
-      const etsyShop = shops.results[0];
+      // getShopByOwnerUserId returns the shop object directly (not a
+      // paginated { results: [...] } collection, despite the pluralized
+      // "shops" in Etsy's own endpoint path) — confirmed live. Etsy
+      // responds 404 if the user has no shop yet.
+      let etsyShop;
+      try {
+        etsyShop = await tempClient.getShopByOwnerUserId(userId);
+      } catch (err) {
+        if (err instanceof EtsyApiError && err.status === 404) {
+          reply.code(400);
+          return { error: "no_shop_found", message: "This Etsy account has no shop. Open your shop on Etsy first, then retry." };
+        }
+        throw err;
+      }
       if (!etsyShop) {
         reply.code(400);
         return { error: "no_shop_found", message: "This Etsy account has no shop. Open your shop on Etsy first, then retry." };

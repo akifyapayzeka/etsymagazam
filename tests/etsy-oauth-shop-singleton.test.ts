@@ -14,7 +14,7 @@ const upsertShop = vi.fn();
 const updateManyEtsyConnection = vi.fn();
 const createEtsyConnection = vi.fn();
 const upsertAutopilotState = vi.fn();
-const getShopsByOwnerUserId = vi.fn();
+const getShopByOwnerUserId = vi.fn();
 
 vi.mock("@etsymagazam/database", () => ({
   CANONICAL_SHOP_ID,
@@ -31,7 +31,7 @@ vi.mock("@etsymagazam/etsy", () => ({
   buildAuthorizeUrl: vi.fn(),
   DEFAULT_OAUTH_SCOPES: ["listings_r"],
   EtsyApiClient: vi.fn().mockImplementation(() => ({
-    getShopsByOwnerUserId,
+    getShopByOwnerUserId,
   })),
   exchangeCodeForToken: vi.fn().mockResolvedValue({
     access_token: "user_1.access-token",
@@ -51,7 +51,7 @@ describe("Etsy OAuth callback (integration: single canonical Shop row)", () => {
     updateManyEtsyConnection.mockReset();
     createEtsyConnection.mockReset();
     upsertAutopilotState.mockReset();
-    getShopsByOwnerUserId.mockReset();
+    getShopByOwnerUserId.mockReset();
   });
 
   async function callback(cookiePayload: { state: string; codeVerifier: string }) {
@@ -68,7 +68,7 @@ describe("Etsy OAuth callback (integration: single canonical Shop row)", () => {
 
   it("upserts by the fixed canonical shop id, never by etsyShopId — so first connect can't create a second Shop row", async () => {
     findUniqueShop.mockResolvedValue(null); // no existing row with this etsyShopId
-    getShopsByOwnerUserId.mockResolvedValue({ results: [{ shop_id: 999, shop_name: "My Shop", currency_code: "USD" }] });
+    getShopByOwnerUserId.mockResolvedValue({ shop_id: 999, shop_name: "My Shop", currency_code: "USD" });
 
     const res = await callback({ state: "xyz", codeVerifier: "verifier" });
 
@@ -82,7 +82,7 @@ describe("Etsy OAuth callback (integration: single canonical Shop row)", () => {
 
   it("refuses to proceed if this Etsy shop is already linked to a different internal shop row, rather than silently duplicating", async () => {
     findUniqueShop.mockResolvedValue({ id: "some-other-row-id", etsyShopId: "999" });
-    getShopsByOwnerUserId.mockResolvedValue({ results: [{ shop_id: 999, shop_name: "My Shop", currency_code: "USD" }] });
+    getShopByOwnerUserId.mockResolvedValue({ shop_id: 999, shop_name: "My Shop", currency_code: "USD" });
 
     const res = await callback({ state: "xyz", codeVerifier: "verifier" });
 

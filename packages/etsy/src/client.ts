@@ -73,9 +73,16 @@ export class EtsyApiClient {
     return this.request<EtsyShop>("GET", `/shops/${shopId}`);
   }
 
-  /** Resolves the Etsy shop(s) owned by the authorizing user — used right after OAuth to discover the shop id. */
-  async getShopsByOwnerUserId(userId: string): Promise<EtsyPaginatedResponse<EtsyShop>> {
-    return this.request<EtsyPaginatedResponse<EtsyShop>>("GET", `/users/${userId}/shops`);
+  /**
+   * Resolves the Etsy shop owned by the authorizing user — used right after
+   * OAuth to discover the shop id. Confirmed live against Etsy's API:
+   * despite the "shops" (plural) name, this returns a single Shop object
+   * directly, NOT a { count, results: [...] } paginated collection (an
+   * Etsy seller account has exactly one shop). Throws EtsyApiError with
+   * status 404 if the user has no shop.
+   */
+  async getShopByOwnerUserId(userId: string): Promise<EtsyShop> {
+    return this.request<EtsyShop>("GET", `/users/${userId}/shops`);
   }
 
   /** createDraftListing requires application/x-www-form-urlencoded, not JSON (verified against Etsy's official docs). */

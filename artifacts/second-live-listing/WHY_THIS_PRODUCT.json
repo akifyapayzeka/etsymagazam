@@ -1,0 +1,43 @@
+{
+  "researchDate": "2026-08-27",
+  "researchMethod": "Web search against Etsy market/listing pages, digital-product trend roundups, and career-transition demand signals. No Etsy scraping, browser automation, or CAPTCHA bypass was used — only ordinary search results and publicly published trend reports, the same method used for the first Form & Fern listing.",
+  "brief": "The user asked for a second product from a proven best-selling category, in a different category and theme than the first listing (a pet-adoption/rescue-dog decompression planner, category pet_supplies_printable).",
+  "categoryResearch": "Wall art, digital planners/organizers, wedding templates, and business templates are consistently named as the top-selling Etsy printable categories for 2026 (multiple trend-roundup sources). Planners/organizers alone are cited at $8-25 per listing with ~95% margins.",
+  "rejectedCandidate": {
+    "productName": "Irregular Income Budget Planner for Freelancers/Gig Workers",
+    "reasonRejected": "Real, validated demand, but the competitive set found on Etsy is dominated by mature Google Sheets/Excel products with live formulas, tax calculators, and auto-updating dashboards (e.g. 'Gig Life Budget Planner', 'Freelancer Budget Spreadsheet 2026'). This system's product-generator only renders static, deterministic PDF/PNG pages (no spreadsheet formulas) — competing head-on against interactive spreadsheet tools would be a capability mismatch, not just a content gap. Same pattern the first listing's research explicitly rejected (crowded niche, no honest differentiation for what this system can actually produce)."
+  },
+  "competitors": [
+    {
+      "name": "Employee 30-60-90 Day Planner / New Hire Onboarding Checklist (multiple Etsy listings)",
+      "knownScope": "HR/manager-facing checklists for onboarding a new employee — pre-start paperwork, orientation logistics, training checklists.",
+      "gapVsOurs": "Written for the EMPLOYER/HR to administer onboarding, not for the new employee's own use. No people/names tracker, no culture-observation log, no personal reflection pages, no boundary-setting or energy-management content, and no 1:1 or manager-question prep sheet from the employee's own point of view."
+    },
+    {
+      "name": "30 60 90 Day Plan Template (Canva/Google Docs/Slides templates)",
+      "knownScope": "Goal-setting and performance templates, typically built for presenting a plan to a manager or in a performance review.",
+      "gapVsOurs": "Strategic/performance-review framing, not a day-to-day companion for the emotional and practical adjustment of starting somewhere new. No day-one survival checklist, no first-week reflection, no emergency/logistics contact sheet."
+    },
+    {
+      "name": "First Day of Work Checklist Printable PDF",
+      "knownScope": "A single-page first-day checklist.",
+      "gapVsOurs": "Covers day one only — no 30/60/90-day arc, no people tracker, no culture log, no boundaries page, no manager 1:1 prep."
+    }
+  ],
+  "winner": {
+    "productName": "New Job Confidence Kit: 90-Day Printable Planner for Starting a New Job",
+    "targetCustomer": "Someone who just accepted a new job (or is about to start one) — new grads, career changers, and anyone anxious about the first impression and adjustment period, buying for themselves or as a thoughtful gift for a friend who just got hired somewhere.",
+    "problem": "Existing 'new job' printables found on Etsy are either HR-administered onboarding checklists (written for the employer, not the new hire) or performance-oriented 30-60-90 templates for reviews — none found bundle the personal, day-to-day adjustment tools (a people/names tracker, an unwritten-culture-rules log, a boundaries/energy page, a judgment-free reflection space) that mirror what a new hire actually needs emotionally and practically in their first 90 days.",
+    "purchaseIntent": "High — bought right around a specific, urgent, high-emotion trigger event (accepting or starting a new job), same purchase-intent shape as the first listing's adoption-day trigger.",
+    "demandSignal": "Millions of U.S. workers start new jobs every year across new grads, career changers, and voluntary job switchers; 'new job' and 'career transition' printables/planners are called out repeatedly in 2026 Etsy digital-product trend research as a consistent-demand niche alongside budget and wellness planners.",
+    "competitionSignal": "Medium — real competitors exist for '30 60 90 day plan' and 'new hire checklist' (see 'competitors' above), so this is not an empty-category play, but every competitor found is either HR/employer-facing or strategy/performance-facing, not personal-adjustment-facing.",
+    "differentiation": "A 13-page (12 content pages + title page) system built around the new EMPLOYEE's own adjustment, not the employer's onboarding process: Before-Day-One prep, Day One Survival, a People & Names Tracker, a Culture & Unwritten Rules Log, a First Week Reflection, 30/60/90-day check-ins framed around personal confidence (not performance review), a Manager 1:1 Prep Sheet, a Questions Worth Asking organizer, a Boundaries & Energy Management page, and a Key Contacts & Logistics Sheet.",
+    "automationSuitability": "High — fits the deterministic checklist template well, requires no HR/legal/medical advice (purely organizational and observational language, with an explicit disclaimer), and 'first 90 days at a new job' is generic, publicly-understood career-transition language, not any single organization's, book's, or competitor's proprietary framework. Deliberately does not title the product or reuse the specific framework from Michael Watkins' 'The First 90 Days' book to avoid any association with that specific copyrighted work.",
+    "seasonality": "Mild lift around January (New Year job changes) and September (post-summer hiring), but genuinely evergreen — people start new jobs year-round.",
+    "ipRisk": "0/100 — verified by the QA package's real IP/Policy Guard blocklist scan of all listing and product text. During this build, the IP guard's fuzzy (edit-distance) matcher initially flagged the common words 'like' (vs. 'Nike') and 'channel' (vs. 'Chanel') as false-positive brand matches — a real bug, fixed in packages/qa/src/ip-guard.ts (raised the fuzzy-match floor from 4 to 5 characters, with a regression test) and by rewording 'chat channel' to 'chat group' in this product's own copy.",
+    "estimatedPrice": "$7.50 USD (reference price, valid only if the connected Etsy shop's currency is USD — see listing-data/etsy-price.txt)",
+    "opportunityScore": 80,
+    "scoreRationale": "High, evergreen purchase intent and a genuinely larger addressable audience than the first listing's rescue-dog niche (job changes happen far more often than shelter-dog adoptions). Scored slightly below the first listing's 82 because 'new job' printables, while differentiated by this specific personal-adjustment angle, sit in a more heavily trafficked keyword space (30-60-90, onboarding checklist) than the first listing's more specific '3-3-3 rescue dog' niche."
+  },
+  "decision": "New Job Confidence Kit is Form & Fern's second product — deliberately a different Etsy category (career/business vs. pet supplies), different template theme, and different palette (Minimal Mono vs. Sage) from the first listing, built to the same QA bar (score >= 95, IP risk <= 10) and the same deterministic rendering pipeline (packages/product-generator + packages/qa)."
+}

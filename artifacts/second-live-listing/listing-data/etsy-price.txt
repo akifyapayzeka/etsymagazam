@@ -1,0 +1,6 @@
+7.50 (only valid if the connected Etsy shop's currency is USD)
+
+This figure is a reference price computed in USD. Etsy's price field has no currency parameter on write — it always uses whatever currency the shop itself is set to. Before entering a price:
+1. Check the shop's currency in Etsy Shop Manager > Finances > Payment account (or Settings).
+2. If the shop currency is USD, enter 7.50.
+3. If the shop currency is anything other than USD (e.g. TRY), do NOT enter 7.50 as the number — convert it to the shop's currency at a current exchange rate first, then enter that converted amount.

@@ -88,7 +88,7 @@ function tokenize(text: string): string[] {
 
 /** Finds the closest word in `words` to `target` by normalized Levenshtein distance, if close enough to be suspicious. */
 function findFuzzyMatch(target: string, words: string[]): { confidence: number } | undefined {
-  if (target.length < 4) return undefined; // too short to fuzzy-match safely (false positive risk)
+  if (target.length < 5) return undefined; // too short to fuzzy-match safely (false positive risk) — e.g. "Nike" vs "like", "Elsa" vs "else" are 1 edit apart
   let best = Infinity;
   for (const word of words) {
     if (Math.abs(word.length - target.length) > 2) continue;

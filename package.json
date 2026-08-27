@@ -24,7 +24,8 @@
     "db:generate": "pnpm --filter @etsymagazam/database run generate",
     "db:migrate": "pnpm --filter @etsymagazam/database run migrate",
     "db:seed": "pnpm --filter @etsymagazam/database run seed",
-    "pipeline:dry-run": "tsx scripts/run-pipeline-test.ts"
+    "pipeline:dry-run": "tsx scripts/run-pipeline-test.ts",
+    "publish:manual-products": "tsx scripts/publish-manual-products.ts"
   },
   "dependencies": {
     "@etsymagazam/ai": "workspace:*",

@@ -1,5 +1,6 @@
 import { createLogger, loadEnv, QUEUE_NAMES } from "@etsymagazam/core";
 import { getCanonicalShop, prisma } from "@etsymagazam/database";
+import { checkPlaceholderLeakage } from "@etsymagazam/qa";
 import { createProductVersion, slugify } from "../agents/product-creator.js";
 import { draftProductConcept } from "../agents/product-strategy.js";
 import { generateSeoCopy } from "../agents/seo.js";
@@ -59,6 +60,35 @@ export async function handleGenerateProduct(data: ProductGenerationJobData): Pro
 
   const entry = CATALOG[productType] ?? (Object.values(CATALOG)[0] as CatalogEntry);
   const concept = await draftProductConcept({ opportunityTitle, niche, productType });
+
+  // The AI text call in draftProductConcept degrades to a deterministic
+  // fallback concept (literal "Item one"/"Item two"/"Item three" body text)
+  // if the call fails or the configured AI_TEXT_PROVIDER is "mock" — that
+  // fallback exists so the pipeline never stalls, but it must never reach a
+  // real customer-facing listing. Catch it here, before any file is
+  // rendered or any Product/ProductVersion row is created, rather than
+  // relying on the downstream QA job (which only scans SEO title/description,
+  // never the actual page content).
+  const conceptText = [concept.title, concept.eyebrow, concept.subtitle, concept.footer, ...(concept.bodyLines ?? []), ...(concept.items ?? [])]
+    .filter((s): s is string => Boolean(s))
+    .join(" | ");
+  const placeholderIssues = checkPlaceholderLeakage(conceptText, "product concept");
+  if (placeholderIssues.length > 0) {
+    log.error({ opportunityTitle, issues: placeholderIssues }, "Product concept contains placeholder/fallback text — refusing to generate a real product from it.");
+    if ("opportunityId" in data) {
+      await prisma.opportunity.update({ where: { id: data.opportunityId }, data: { status: "NEW" } });
+    }
+    await recordDecision({
+      agentName: "product-creator-agent",
+      entityType: "opportunity",
+      entityId: opportunityId ?? opportunityTitle,
+      action: "reject_placeholder_concept",
+      reason: `Concept for "${opportunityTitle}" contained placeholder/fallback text (likely the AI text call failed or AI_TEXT_PROVIDER is unset) — blocked before rendering.`,
+      dataUsed: { issues: placeholderIssues.map((i) => i.code) },
+      confidenceScore: 1,
+    });
+    return;
+  }
 
   const product = await prisma.product.create({
     data: {

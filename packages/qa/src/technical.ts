@@ -106,6 +106,7 @@ const PLACEHOLDER_MARKERS = [
   /\bxxxx+\b/i,
   /\bplaceholder\b/i,
   /\[insert /i,
+  /\bitem one\b/i, // apps/worker/src/agents/product-strategy.ts's deterministic fallback concept, in case the AI call ever fails/returns unusable content
 ];
 
 /** Scans generated text content for leftover placeholder/demo data (e.g. AI forgetting to fill in the real name/date). */

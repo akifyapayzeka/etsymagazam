@@ -22,6 +22,17 @@ const STARTER_OPPORTUNITIES: Array<{
   reasoning: string;
 }> = [
   {
+    title: "weekly meal planner and grocery list printable",
+    niche: "planner",
+    productType: "checklist",
+    demandScore: 78,
+    competitionScore: 45,
+    marginScore: 72,
+    seasonalityScore: 58,
+    opportunityScore: 82,
+    reasoning: "Meal planners and grocery lists are evergreen printable searches, visibly different from budget and pet products.",
+  },
+  {
     title: "weekly reset checklist printable",
     niche: "organization",
     productType: "checklist",
@@ -55,6 +66,17 @@ const STARTER_OPPORTUNITIES: Array<{
     reasoning: "Habit trackers are evergreen, simple to render, and suitable for instant-download delivery.",
   },
   {
+    title: "teacher weekly lesson planner printable",
+    niche: "planner",
+    productType: "checklist",
+    demandScore: 74,
+    competitionScore: 49,
+    marginScore: 68,
+    seasonalityScore: 70,
+    opportunityScore: 75,
+    reasoning: "Teacher planners and classroom worksheets are high-demand digital printables with a different buyer theme.",
+  },
+  {
     title: "home cleaning schedule printable",
     niche: "organization",
     productType: "home_organization_printable",
@@ -75,6 +97,17 @@ const STARTER_OPPORTUNITIES: Array<{
     seasonalityScore: 57,
     opportunityScore: 72,
     reasoning: "Planner-adjacent checklist product suitable for daily automatic generation.",
+  },
+  {
+    title: "small business order tracker printable",
+    niche: "organization",
+    productType: "checklist",
+    demandScore: 72,
+    competitionScore: 48,
+    marginScore: 70,
+    seasonalityScore: 57,
+    opportunityScore: 73,
+    reasoning: "Business trackers are a different visual/use-case theme while still fitting low-risk printable delivery.",
   },
   {
     title: "moving checklist printable",

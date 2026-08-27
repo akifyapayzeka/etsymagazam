@@ -9,6 +9,26 @@ function startOfDayUtc(d = new Date()): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 }
 
+function normalizeProductTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\b(printable|digital|download|pdf|instant|bundle|template|planner)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function isDistinctOpportunityTitle(title: string, existingTitles: string[]): boolean {
+  const normalized = normalizeProductTitle(title);
+  if (!normalized) return false;
+
+  return existingTitles.every((existing) => {
+    const other = normalizeProductTitle(existing);
+    if (!other) return true;
+    return normalized !== other && !normalized.includes(other) && !other.includes(normalized);
+  });
+}
+
 export interface GateCheck {
   allowed: boolean;
   reason: string;
@@ -59,14 +79,33 @@ export async function runDailyPlanning(shopId: string): Promise<{ selected: numb
   const remaining = Math.max(0, Math.min(state.maxProductsPerDay - todayCount, state.maxProductsPerWeek - weekCount));
   if (remaining === 0) return { selected: 0, reason: "No budget remaining." };
 
+  const existingProducts = await prisma.product.findMany({
+    where: { shopId, status: { notIn: ["CANCELLED", "ARCHIVED", "DEACTIVATED"] } },
+    select: { title: true },
+  });
+
   const candidates = await prisma.opportunity.findMany({
     where: { status: "NEW" },
     orderBy: { opportunityScore: "desc" },
-    take: remaining,
+    take: Math.max(remaining * 5, remaining),
   });
 
   let selected = 0;
   for (const opp of candidates) {
+    if (!isDistinctOpportunityTitle(opp.title, existingProducts.map((p) => p.title))) {
+      await recordDecision({
+        agentName: "store-director",
+        entityType: "opportunity",
+        entityId: opp.id,
+        action: "skip_duplicate_opportunity",
+        reason: `Skipped "${opp.title}" because it is too similar to an existing product title.`,
+        dataUsed: { existingTitles: existingProducts.map((p) => p.title) },
+        confidenceScore: 0.9,
+        result: "SKIPPED",
+      });
+      continue;
+    }
+
     await prisma.opportunity.update({ where: { id: opp.id }, data: { status: "SELECTED" } });
     await getQueue(QUEUE_NAMES.PRODUCT_GENERATION).add("generate-product-from-opportunity", { opportunityId: opp.id });
     await recordDecision({
@@ -79,6 +118,8 @@ export async function runDailyPlanning(shopId: string): Promise<{ selected: numb
       confidenceScore: opp.opportunityScore / 100,
     });
     selected += 1;
+    existingProducts.push({ title: opp.title });
+    if (selected >= remaining) break;
   }
 
   log.info({ shopId, selected }, "Store Director daily planning complete");

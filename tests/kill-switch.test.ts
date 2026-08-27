@@ -65,3 +65,21 @@ describe("Store Director gate (integration: kill switch + production limits)", (
     expect(gate.allowed).toBe(true);
   });
 });
+
+describe("Store Director opportunity distinctness", () => {
+  it("treats SEO variants of the same product as duplicates", async () => {
+    const { isDistinctOpportunityTitle } = await import("../apps/worker/src/agents/store-director.js");
+
+    expect(
+      isDistinctOpportunityTitle("monthly budget planner printable", [
+        "Monthly Budget Planner Printable | Finance Tracker PDF | Savings & Expense Planner | Instant Download",
+      ]),
+    ).toBe(false);
+  });
+
+  it("allows a different printable theme", async () => {
+    const { isDistinctOpportunityTitle } = await import("../apps/worker/src/agents/store-director.js");
+
+    expect(isDistinctOpportunityTitle("weekly meal planner and grocery list printable", ["Monthly Budget Planner Printable"])).toBe(true);
+  });
+});

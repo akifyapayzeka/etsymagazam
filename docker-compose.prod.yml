@@ -99,8 +99,8 @@ services:
       BRAND_DISPLAY_NAME: Form & Fern
       STORAGE_LOCAL_PATH: /repo/storage
       # --- autopilot gate: keep closed until explicitly opened up ---
-      AUTO_PUBLISH: "false"
-      DRY_RUN: "true"
+      AUTO_PUBLISH: "${AUTO_PUBLISH:-false}"
+      DRY_RUN: "${DRY_RUN:-true}"
     volumes:
       - etsy_storage_data:/repo/storage
     depends_on:
@@ -152,8 +152,8 @@ services:
       # actual pause switch (AutopilotState.isPaused) is a DB row, set to
       # true automatically on first OAuth connect (see etsy-oauth.ts) — it
       # is not an env var. Flip it via the dashboard when ready to unpause.
-      AUTO_PUBLISH: "false"
-      DRY_RUN: "true"
+      AUTO_PUBLISH: "${AUTO_PUBLISH:-false}"
+      DRY_RUN: "${DRY_RUN:-true}"
     volumes:
       - etsy_storage_data:/repo/storage
     depends_on:

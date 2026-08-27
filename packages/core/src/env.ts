@@ -61,6 +61,8 @@ const envSchema = z.object({
   ETSY_WEBHOOK_SIGNING_SECRET: z.string().optional().default(""),
   /** JSON object mapping ISO currency code -> rate relative to USD, e.g. {"EUR":0.92}. All internal pricing (product-catalog.json, MIN_PRICE/MAX_PRICE) is USD-denominated; a shop whose currency isn't USD and isn't listed here is hard-blocked from publishing rather than mis-priced. See packages/core/src/currency.ts. */
   FX_STATIC_RATES: z.string().optional().default(""),
+  /** Optional JSON object mapping internal product categories -> Etsy numeric taxonomy_id. This lets production update live taxonomy ids without rebuilding the worker image. */
+  ETSY_TAXONOMY_IDS: z.string().optional().default(""),
   ETSY_OAUTH_SCOPES: z
     .string()
     .default("listings_r,listings_w,listings_d,shops_r,shops_w,transactions_r,transactions_w,profile_r"),

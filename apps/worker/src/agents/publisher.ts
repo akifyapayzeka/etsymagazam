@@ -9,6 +9,19 @@ import type { SeoOutput } from "./seo.js";
 const log = createLogger("publisher-agent");
 
 export function resolveTaxonomyId(category: string): number | null {
+  const envOverride = (process.env.ETSY_TAXONOMY_IDS ?? "").trim();
+  if (envOverride) {
+    try {
+      const parsed = JSON.parse(envOverride) as unknown;
+      if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+        const value = (parsed as Record<string, unknown>)[category];
+        if (typeof value === "number" && Number.isInteger(value) && value > 0) return value;
+      }
+    } catch (err) {
+      log.warn({ err }, "Invalid ETSY_TAXONOMY_IDS JSON — falling back to bundled taxonomy map.");
+    }
+  }
+
   const map = etsyTaxonomy.categoryToTaxonomyId as Record<string, number | null>;
   return map[category] ?? null;
 }

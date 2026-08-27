@@ -39,8 +39,8 @@ set_env "FX_STATIC_RATES" '{"TRY":48.13}'
 
 set_env "AUTO_PUBLISH" "true"
 set_env "DRY_RUN" "false"
-set_env "MAX_PRODUCTS_PER_DAY" "1"
-set_env "MAX_PRODUCTS_PER_WEEK" "7"
+set_env "MAX_PRODUCTS_PER_DAY" "2"
+set_env "MAX_PRODUCTS_PER_WEEK" "14"
 
 echo "Building api and worker images so the latest scripts/source are inside the containers..."
 $COMPOSE build api

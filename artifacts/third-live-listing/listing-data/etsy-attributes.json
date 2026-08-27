@@ -1,0 +1,17 @@
+{
+  "occasion": "Anniversary",
+  "style": "Minimalist",
+  "recipient": "Pet owner",
+  "color": "Blush pink",
+  "primaryColor": "Pink",
+  "materials": [
+    "Digital File",
+    "PDF",
+    "PNG"
+  ],
+  "who_made": "i_did",
+  "when_made": "2020_2026",
+  "type": "download",
+  "quantity": 999,
+  "should_auto_renew": true
+}

@@ -1,0 +1,3 @@
+pet_supplies_printable
+
+(This is a category HINT for the human publisher, not a numeric taxonomy_id — the autopilot system never guesses one; see docs/ETSY_SETUP.md step 6. In Etsy's listing editor, type a description of the actual product — e.g. "pet keepsake printable" or "adoption certificate" — into the category search field and Etsy will suggest real, current categories live. Pick whichever suggested category is the closest match at the time you create it.)

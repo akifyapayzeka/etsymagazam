@@ -27,8 +27,8 @@ describe("checkIpRisk", () => {
     expect(result.decision).toBe("REJECTED");
   });
 
-  it("does not flag common English words one edit away from a short (<5 char) brand name (Nike/like, Elsa/else, Yoda/soda)", () => {
-    const result = checkIpRisk("We'd like a soda while we plan updates for the team.", 40);
+  it("does not flag common English words one edit away from a short (<6 char) brand name (Nike/like, Elsa/else, Apple/apply)", () => {
+    const result = checkIpRisk("We'd like a soda while we apply updates for the team.", 40);
     expect(result.matchedTerms).toEqual([]);
     expect(result.decision).toBe("APPROVED");
   });

@@ -1,0 +1,47 @@
+{
+  "productSlug": "modern-neutral-baby-shower-games-bundle-v1",
+  "title": "Modern Neutral Baby Shower Games Bundle Printable | 18 Baby Shower Games, Signs & Activities PDF",
+  "priceUsd": 7.99,
+  "cardPageCount": 18,
+  "twoUpPageCount": 9,
+  "listingImageCount": 10,
+  "downloadableFiles": [
+    {
+      "name": "modern-neutral-baby-shower-games-bundle-v1-5x7-cards.pdf",
+      "sizeMb": 1.4
+    },
+    {
+      "name": "modern-neutral-baby-shower-games-bundle-v1-letter-2up.pdf",
+      "sizeMb": 1.67
+    },
+    {
+      "name": "modern-neutral-baby-shower-games-bundle-v1-a4-2up.pdf",
+      "sizeMb": 1.67
+    },
+    {
+      "name": "modern-neutral-baby-shower-games-bundle-v1-complete-bundle.zip",
+      "sizeMb": 3.22
+    }
+  ],
+  "qaReport": {
+    "designScore": 100,
+    "technicalScore": 100,
+    "seoScore": 100,
+    "originalityScore": 100,
+    "policySafetyScore": 100,
+    "overallScore": 100,
+    "passed": true,
+    "issues": []
+  },
+  "ipCheck": {
+    "riskScore": 0,
+    "riskLevel": "NONE",
+    "matchedTerms": [],
+    "decision": "APPROVED",
+    "rulesetVersion": "ip-blocklist@3"
+  },
+  "feeScheduleMeta": {
+    "version": 1,
+    "lastVerified": "2026-01-01"
+  }
+}

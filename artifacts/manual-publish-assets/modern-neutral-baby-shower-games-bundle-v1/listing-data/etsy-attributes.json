@@ -1,0 +1,14 @@
+{
+  "occasion": "Baby shower",
+  "style": "Minimalist",
+  "recipient": "Parent-to-be",
+  "color": "Neutral",
+  "materials": [
+    "Digital File",
+    "PDF",
+    "ZIP"
+  ],
+  "type": "download",
+  "quantity": 999,
+  "should_auto_renew": true
+}

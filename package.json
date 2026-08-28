@@ -25,6 +25,7 @@
     "db:migrate": "pnpm --filter @etsymagazam/database run migrate",
     "db:seed": "pnpm --filter @etsymagazam/database run seed",
     "build:botanical-wedding": "tsx scripts/build-botanical-wedding-planner.ts",
+    "build:baby-shower-games": "tsx scripts/build-baby-shower-games-bundle.ts",
     "pipeline:dry-run": "tsx scripts/run-pipeline-test.ts",
     "publish:manual-products": "tsx scripts/publish-manual-products.ts"
   },

@@ -26,6 +26,38 @@ type ManualProduct = {
 
 const products: ManualProduct[] = [
   {
+    slug: "modern-neutral-baby-shower-games-bundle-v1",
+    productTitle: "Modern Neutral Baby Shower Games Bundle Printable",
+    listingTitle: "Modern Neutral Baby Shower Games Bundle Printable | 18 Baby Shower Games, Signs & Activities PDF",
+    productType: "baby_shower_games_bundle",
+    category: "planner",
+    priceUsd: 7.99,
+    description:
+      "A polished printable baby shower games bundle in a warm neutral style. This instant download is built as a complete party kit, not a single worksheet, so the host can print a cohesive set of games, signs, keepsakes, answer keys, and simple party tools.\n\n" +
+      "Included files:\n- Complete ZIP bundle\n- 5x7 card PDF\n- US Letter 2-up PDF\n- A4 2-up PDF\n- How-to-print instructions\n- Personal-use license\n\n" +
+      "Inside the bundle:\n- 18 real printable card pages\n- Host Guide\n- Baby Bingo\n- Predictions & Advice\n- Wishes For Baby\n- Baby Word Scramble\n- Word Scramble Answer Key\n- Baby Name Race\n- Baby Shower Trivia\n- Trivia Answer Key\n- Guess The Price\n- What's In Your Bag?\n- Parent-To-Be Quiz\n- Don't Say Baby sign\n- Diaper Raffle sign\n- Diaper Raffle Tickets\n- Late Night Diaper Notes\n- Gift Log\n- Thank You Address Cards\n\n" +
+      "How it works: purchase this listing, download the files from Etsy, open the PDF size you prefer, print, cut if needed, and set the cards out with pens. No app, login, or design software is required.\n\n" +
+      "Digital download only. No physical item will be shipped. Colors may vary by monitor, printer, ink, and paper. For personal baby shower or event use only.\n\n" +
+      "This listing's description and written product content (e.g. checklist/planner text) were drafted with AI assistance, directed and edited by the shop owner. The page layout, typography, and final design are original, non-AI work.",
+    tags: [
+      "baby shower games",
+      "baby shower pdf",
+      "printable games",
+      "baby games",
+      "party games pdf",
+      "gender neutral",
+      "baby bingo",
+      "baby predictions",
+      "word scramble",
+      "diaper raffle",
+      "shower bundle",
+      "instant download",
+      "neutral baby",
+    ],
+    materials: ["Digital File", "PDF", "ZIP"],
+    attributes: { occasion: "Baby shower", style: "Minimalist", recipient: "Parent-to-be", color: "Neutral" },
+  },
+  {
     slug: "botanical-wedding-planner-binder-v1",
     productTitle: "Botanical Wedding Planner Binder Printable",
     listingTitle: "Botanical Wedding Planner Binder Printable | Wedding Budget, Guest List, Timeline & Checklist PDF",

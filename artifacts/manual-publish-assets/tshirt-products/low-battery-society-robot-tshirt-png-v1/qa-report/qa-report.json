@@ -1,0 +1,82 @@
+{
+  "slug": "low-battery-society-robot-tshirt-png-v1",
+  "productName": "Low Battery Society Robot",
+  "buyerZip": {
+    "filename": "02_LOW_BATTERY_SOCIETY_BUYER_DOWNLOAD.zip",
+    "sizeBytes": 274193,
+    "entries": [
+      "READ_ME_LICENSE.txt",
+      "02_LOW_BATTERY_SOCIETY_4500x5400_300DPI_TRANSPARENT.png"
+    ],
+    "png": {
+      "filename": "02_LOW_BATTERY_SOCIETY_4500x5400_300DPI_TRANSPARENT.png",
+      "width": 4500,
+      "height": 5400,
+      "hasAlpha": true,
+      "hasTransparentPixels": true,
+      "density": 300
+    }
+  },
+  "listingImages": [
+    {
+      "filename": "01_MAIN_MOCKUP.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 225778
+    },
+    {
+      "filename": "02_ARTWORK_DETAILS.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 294859
+    },
+    {
+      "filename": "03_TRANSPARENT_PNG.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 253404
+    },
+    {
+      "filename": "04_LIGHT_TEE_MOCKUP.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 210939
+    },
+    {
+      "filename": "05_HOW_IT_WORKS.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 193932
+    }
+  ],
+  "titleLength": 106,
+  "tagCount": 13,
+  "tags": [
+    "robot tshirt png",
+    "low battery art",
+    "retro robot png",
+    "funny robot design",
+    "streetwear graphic",
+    "digital download",
+    "dtf design png",
+    "tech humor shirt",
+    "transparent png",
+    "robot graphic png",
+    "low energy design",
+    "printable shirt art",
+    "retro tech art"
+  ],
+  "priceTry": 149,
+  "trademarkReview": {
+    "phrase": "Low Battery Society",
+    "decision": "APPROVED_FOR_PUBLISH",
+    "note": "Manual current web/USPTO-oriented search found broad low-battery apparel phrase use, but no obvious active exact apparel trademark conflict or third-party logo issue."
+  },
+  "issues": [],
+  "passed": true
+}

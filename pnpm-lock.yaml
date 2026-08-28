@@ -26,6 +26,12 @@ importers:
       '@etsymagazam/qa':
         specifier: workspace:*
         version: link:packages/qa
+      jszip:
+        specifier: ^3.10.1
+        version: 3.10.1
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
     devDependencies:
       '@types/node':
         specifier: ^22.10.2

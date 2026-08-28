@@ -27,7 +27,9 @@
     "build:botanical-wedding": "tsx scripts/build-botanical-wedding-planner.ts",
     "build:baby-shower-games": "tsx scripts/build-baby-shower-games-bundle.ts",
     "pipeline:dry-run": "tsx scripts/run-pipeline-test.ts",
-    "publish:manual-products": "tsx scripts/publish-manual-products.ts"
+    "publish:manual-products": "tsx scripts/publish-manual-products.ts",
+    "qa:tshirt-products": "tsx scripts/qa-tshirt-products.ts",
+    "publish:tshirt-products": "tsx scripts/publish-tshirt-products.ts"
   },
   "dependencies": {
     "@etsymagazam/ai": "workspace:*",
@@ -35,7 +37,9 @@
     "@etsymagazam/database": "workspace:*",
     "@etsymagazam/etsy": "workspace:*",
     "@etsymagazam/product-generator": "workspace:*",
-    "@etsymagazam/qa": "workspace:*"
+    "@etsymagazam/qa": "workspace:*",
+    "jszip": "^3.10.1",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

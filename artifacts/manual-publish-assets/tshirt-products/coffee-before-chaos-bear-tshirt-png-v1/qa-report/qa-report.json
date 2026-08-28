@@ -1,0 +1,82 @@
+{
+  "slug": "coffee-before-chaos-bear-tshirt-png-v1",
+  "productName": "Coffee Before Chaos Bear",
+  "buyerZip": {
+    "filename": "05_COFFEE_BEFORE_CHAOS_BUYER_DOWNLOAD.zip",
+    "sizeBytes": 289239,
+    "entries": [
+      "READ_ME_LICENSE.txt",
+      "05_COFFEE_BEFORE_CHAOS_4500x5400_300DPI_TRANSPARENT.png"
+    ],
+    "png": {
+      "filename": "05_COFFEE_BEFORE_CHAOS_4500x5400_300DPI_TRANSPARENT.png",
+      "width": 4500,
+      "height": 5400,
+      "hasAlpha": true,
+      "hasTransparentPixels": true,
+      "density": 300
+    }
+  },
+  "listingImages": [
+    {
+      "filename": "01_MAIN_MOCKUP.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 229477
+    },
+    {
+      "filename": "02_ARTWORK_DETAILS.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 314627
+    },
+    {
+      "filename": "03_TRANSPARENT_PNG.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 270389
+    },
+    {
+      "filename": "04_LIGHT_TEE_MOCKUP.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 219509
+    },
+    {
+      "filename": "05_HOW_IT_WORKS.jpg",
+      "width": 2400,
+      "height": 1800,
+      "format": "jpeg",
+      "sizeBytes": 193932
+    }
+  ],
+  "titleLength": 98,
+  "tagCount": 13,
+  "tags": [
+    "coffee tshirt png",
+    "coffee bear art",
+    "funny bear png",
+    "coffee lover gift",
+    "morning humor",
+    "streetwear png",
+    "digital download",
+    "dtf design png",
+    "transparent png",
+    "bear graphic png",
+    "caffeine design",
+    "printable shirt art",
+    "coffee graphic"
+  ],
+  "priceTry": 149,
+  "trademarkReview": {
+    "phrase": "Coffee Before Chaos",
+    "decision": "APPROVED_FOR_PUBLISH",
+    "note": "Manual current web/USPTO-oriented search found marketplace phrase use, but no obvious active exact apparel trademark conflict or third-party logo issue."
+  },
+  "issues": [],
+  "passed": true
+}

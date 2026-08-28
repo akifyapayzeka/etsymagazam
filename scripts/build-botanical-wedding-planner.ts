@@ -793,6 +793,78 @@ function pageMockup(buffer: Buffer, x: number, y: number, w: number, h: number, 
   </g>`;
 }
 
+function premiumHeroListingSvg(cover: Buffer, budget: Buffer, guest: Buffer, timeline: Buffer): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000" viewBox="0 0 2000 2000">
+    <rect width="2000" height="2000" fill="${COLORS.ivory}"/>
+    <rect x="56" y="56" width="1888" height="1888" rx="52" fill="${COLORS.paper}" stroke="${COLORS.line}" stroke-width="5"/>
+    <rect x="92" y="92" width="720" height="1816" rx="44" fill="${COLORS.sageDark}"/>
+    <circle cx="1628" cy="366" r="190" fill="${COLORS.blush}" opacity="0.44"/>
+    <circle cx="1084" cy="1554" r="280" fill="${COLORS.sageLight}" opacity="0.58"/>
+    ${botanicalSprig(142, 120, 0.62, -18)}
+    ${botanicalSprig(748, 1770, 0.74, 160)}
+    ${textBlock({ text: "TREND-ALIGNED\nWEDDING PRINTABLE", x: 156, y: 286, size: 31, fill: COLORS.gold, family: SANS, weight: 800, uppercase: true, letterSpacing: 5, lineHeight: 52 })}
+    ${textBlock({ text: "Botanical\nWedding\nPlanner\nBinder", x: 154, y: 520, size: 105, fill: COLORS.paper, family: SERIF, lineHeight: 116 })}
+    ${textBlock({ text: "34-page printable planning bundle", x: 154, y: 1070, size: 44, fill: COLORS.ivory, family: SANS, weight: 700, maxChars: 25, lineHeight: 58 })}
+    <rect x="154" y="1218" width="530" height="82" rx="41" fill="${COLORS.terracotta}"/>
+    ${textBlock({ text: "INSTANT DOWNLOAD", x: 188, y: 1272, size: 32, fill: COLORS.paper, family: SANS, weight: 900, uppercase: true, letterSpacing: 3 })}
+    ${["Budget", "Guests", "RSVP", "Vendors", "Timeline", "Seating"]
+      .map((label, index) => {
+        const col = index % 2;
+        const row = Math.floor(index / 2);
+        const x = 154 + col * 250;
+        const y = 1398 + row * 118;
+        return `<rect x="${x}" y="${y}" width="210" height="70" rx="35" fill="${index % 2 ? COLORS.sageLight : COLORS.blush}" opacity="0.98"/>
+        ${textBlock({ text: label, x: x + 105, y: y + 45, size: 28, fill: COLORS.ink, family: SANS, weight: 800, anchor: "middle" })}`;
+      })
+      .join("")}
+    ${pageMockup(cover, 1056, 244, 540, 700, -2)}
+    ${pageMockup(budget, 902, 688, 520, 674, -8)}
+    ${pageMockup(guest, 1282, 760, 520, 674, 7)}
+    ${pageMockup(timeline, 1074, 1138, 520, 674, 0)}
+    <rect x="944" y="1646" width="720" height="104" rx="52" fill="${COLORS.ink}"/>
+    ${textBlock({ text: "PDF + ZIP | US LETTER + A4", x: 1304, y: 1713, size: 36, fill: COLORS.paper, family: SANS, weight: 900, anchor: "middle", letterSpacing: 2 })}
+  </svg>`;
+}
+
+function openBinderListingSvg(budget: Buffer, guest: Buffer, vendor: Buffer, timeline: Buffer): string {
+  const ringYs = [760, 910, 1060, 1210, 1360];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000" viewBox="0 0 2000 2000">
+    <rect width="2000" height="2000" fill="${COLORS.ivory}"/>
+    <rect x="54" y="54" width="1892" height="1892" rx="48" fill="${COLORS.paper}" stroke="${COLORS.line}" stroke-width="5"/>
+    ${botanicalSprig(92, 72, 0.46, -18)}
+    ${textBlock({ text: "OPEN BINDER PREVIEW", x: 216, y: 190, size: 32, fill: COLORS.terracotta, family: SANS, weight: 900, uppercase: true, letterSpacing: 5 })}
+    ${textBlock({ text: "See The Actual Planner Pages", x: 154, y: 322, size: 82, fill: COLORS.ink, family: SERIF, maxChars: 34, lineHeight: 92 })}
+    ${textBlock({ text: "A different view from the cover: budget, RSVP, vendor, and day-of pages shown as an open planning binder.", x: 156, y: 460, size: 35, fill: COLORS.muted, family: SANS, maxChars: 78, lineHeight: 48 })}
+    <rect x="172" y="620" width="1656" height="1030" rx="46" fill="#000000" opacity="0.10"/>
+    <rect x="140" y="584" width="1720" height="1030" rx="50" fill="${COLORS.sageLight}" stroke="${COLORS.line}" stroke-width="5"/>
+    <rect x="204" y="642" width="760" height="914" rx="22" fill="${COLORS.panel}" stroke="${COLORS.line}" stroke-width="4"/>
+    <rect x="1036" y="642" width="760" height="914" rx="22" fill="${COLORS.panel}" stroke="${COLORS.line}" stroke-width="4"/>
+    <rect x="966" y="610" width="68" height="972" rx="34" fill="${COLORS.sageDark}"/>
+    ${ringYs
+      .map(
+        (y) =>
+          `<ellipse cx="1000" cy="${y}" rx="68" ry="28" fill="none" stroke="${COLORS.gold}" stroke-width="8"/>
+          <ellipse cx="1000" cy="${y}" rx="38" ry="13" fill="none" stroke="${COLORS.paper}" stroke-width="5"/>`,
+      )
+      .join("")}
+    ${pageMockup(budget, 254, 706, 330, 428, 0)}
+    ${pageMockup(guest, 600, 706, 330, 428, 0)}
+    ${pageMockup(vendor, 1070, 706, 330, 428, 0)}
+    ${pageMockup(timeline, 1416, 706, 330, 428, 0)}
+    ${textBlock({ text: "Left side", x: 250, y: 1286, size: 28, fill: COLORS.terracotta, family: SANS, weight: 900, uppercase: true, letterSpacing: 2 })}
+    ${textBlock({ text: "Budget + RSVP trackers", x: 250, y: 1352, size: 44, fill: COLORS.ink, family: SERIF, maxChars: 24 })}
+    ${textBlock({ text: "Right side", x: 1070, y: 1286, size: 28, fill: COLORS.terracotta, family: SANS, weight: 900, uppercase: true, letterSpacing: 2 })}
+    ${textBlock({ text: "Vendor + timeline pages", x: 1070, y: 1352, size: 44, fill: COLORS.ink, family: SERIF, maxChars: 24 })}
+    ${["Cohesive binder style", "Useful beyond week one", "Buyer-ready bundle"]
+      .map((label, index) => {
+        const x = 244 + index * 520;
+        return `<rect x="${x}" y="1728" width="430" height="92" rx="46" fill="${index === 1 ? COLORS.blush : COLORS.sageLight}" stroke="${COLORS.line}" stroke-width="3"/>
+        ${textBlock({ text: label, x: x + 215, y: 1787, size: 33, fill: COLORS.ink, family: SANS, weight: 900, anchor: "middle" })}`;
+      })
+      .join("")}
+  </svg>`;
+}
+
 function bulletList(items: string[], x: number, y: number, maxChars = 43): string {
   return items
     .map((item, index) => {
@@ -830,27 +902,11 @@ function renderListingImages(letterPages: Buffer[]): Array<{ name: string; buffe
   const svgs = [
     {
       name: "01_cover.png",
-      svg: listingShell(
-        "Botanical Wedding Planner Binder",
-        "A premium printable bundle for couples planning a garden, wildflower, or romantic wedding.",
-        `${pageMockup(cover, 1180, 310, 510, 660, 0)}
-        <rect x="145" y="1228" width="770" height="92" rx="46" fill="${COLORS.sageDark}"/>
-        ${textBlock({ text: "34 printable pages", x: 188, y: 1287, size: 38, fill: COLORS.paper, family: SANS, weight: 800, uppercase: true, letterSpacing: 2 })}
-        ${bulletList(["Budget, guests, RSVP, vendors, seating, timeline", "US Letter and A4 PDFs included", "Ready to print instantly after purchase"], 176, 1444, 40)}`,
-        "Instant download",
-      ),
+      svg: premiumHeroListingSvg(cover, budget, guest, timeline),
     },
     {
       name: "02_binder_preview.png",
-      svg: listingShell(
-        "Looks Like A Real Planning Binder",
-        "Clean pages, soft botanical styling, and enough structure to feel complete without overwhelming the bride.",
-        `${pageMockup(checklist, 1120, 316, 460, 596, -5)}
-        ${pageMockup(budget, 1340, 438, 460, 596, 5)}
-        ${pageMockup(guest, 1236, 706, 460, 596, 0)}
-        ${bulletList(["Countdown pages for every planning phase", "Trackers for money, people, vendors, and timing", "Polished enough to gift or keep in a wedding folder"], 176, 1280, 42)}`,
-        "High perceived value",
-      ),
+      svg: openBinderListingSvg(budget, guest, vendor, timeline),
     },
     {
       name: "03_whats_included.png",

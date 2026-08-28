@@ -1,0 +1,14 @@
+{
+  "occasion": "Wedding",
+  "style": "Botanical",
+  "recipient": "Bride",
+  "color": "Sage green",
+  "materials": [
+    "Digital File",
+    "PDF",
+    "ZIP"
+  ],
+  "type": "download",
+  "quantity": 999,
+  "should_auto_renew": true
+}

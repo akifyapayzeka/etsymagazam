@@ -20,10 +20,43 @@ type ManualProduct = {
   priceUsd: number;
   description: string;
   tags: string[];
+  materials?: string[];
   attributes: SeoOutput["attributes"];
 };
 
 const products: ManualProduct[] = [
+  {
+    slug: "botanical-wedding-planner-binder-v1",
+    productTitle: "Botanical Wedding Planner Binder Printable",
+    listingTitle: "Botanical Wedding Planner Binder Printable | Wedding Budget, Guest List, Timeline & Checklist PDF",
+    productType: "wedding_planner_binder",
+    category: "planner",
+    priceUsd: 9.9,
+    description:
+      "A detailed printable wedding planning binder for botanical, garden, wildflower, and romantic weddings.\n\n" +
+      "This instant download is built to feel like a complete planning system, not a one-page checklist. It helps couples organize the decisions that usually create stress near the end: budget, guest list, RSVPs, vendors, seating, timelines, photo priorities, decor, signage, packing, emergency kit, final week handoffs, and thank-you notes.\n\n" +
+      "Included files:\n- Complete ZIP bundle\n- US Letter PDF\n- A4 PDF\n- Printing guide\n- Personal-use license\n\n" +
+      "Inside the planner:\n- 34 printable pages\n- Wedding vision board\n- Planning countdown checklists\n- Budget and payment trackers\n- Guest list and RSVP dashboard\n- Vendor, venue, seating, timeline, decor, signage, packing, emergency kit, honeymoon, gift, thank-you, and final week pages\n\n" +
+      "Digital download only. No physical item will be shipped. Colors may vary by monitor, printer, ink, and paper. For personal wedding or event use only.\n\n" +
+      "This listing's description and written product content (e.g. checklist/planner text) were drafted with AI assistance, directed and edited by the shop owner. The page layout, typography, and final design are original, non-AI work.",
+    tags: [
+      "wedding planner",
+      "wedding binder",
+      "bridal planner",
+      "wedding checklist",
+      "wedding budget",
+      "guest list",
+      "rsvp tracker",
+      "seating chart",
+      "wedding timeline",
+      "vendor tracker",
+      "garden wedding",
+      "botanical bride",
+      "printable pdf",
+    ],
+    materials: ["Digital File", "PDF", "ZIP"],
+    attributes: { occasion: "Wedding", style: "Botanical", recipient: "Bride", color: "Sage green" },
+  },
   {
     slug: "weekly-meal-planner-grocery-list-v1",
     productTitle: "Weekly Meal Planner & Grocery List Printable",
@@ -172,7 +205,7 @@ async function ensureProduct(product: ManualProduct) {
     title: product.listingTitle,
     description: product.description,
     tags: product.tags,
-    materials: ["Digital File", "PDF", "PNG"],
+    materials: product.materials ?? ["Digital File", "PDF", "PNG"],
     attributes: product.attributes,
     usedAi: true,
   };

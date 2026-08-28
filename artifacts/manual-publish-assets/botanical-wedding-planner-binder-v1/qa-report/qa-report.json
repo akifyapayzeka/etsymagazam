@@ -1,0 +1,42 @@
+{
+  "productSlug": "botanical-wedding-planner-binder-v1",
+  "title": "Botanical Wedding Planner Binder Printable | Wedding Budget, Guest List, Timeline & Checklist PDF",
+  "priceUsd": 9.9,
+  "pageCount": 34,
+  "listingImageCount": 10,
+  "downloadableFiles": [
+    {
+      "name": "botanical-wedding-planner-binder-v1-letter.pdf",
+      "sizeMb": 4.56
+    },
+    {
+      "name": "botanical-wedding-planner-binder-v1-a4.pdf",
+      "sizeMb": 4.17
+    },
+    {
+      "name": "botanical-wedding-planner-binder-v1-complete-bundle.zip",
+      "sizeMb": 5.55
+    }
+  ],
+  "qaReport": {
+    "designScore": 100,
+    "technicalScore": 100,
+    "seoScore": 100,
+    "originalityScore": 100,
+    "policySafetyScore": 100,
+    "overallScore": 100,
+    "passed": true,
+    "issues": []
+  },
+  "ipCheck": {
+    "riskScore": 0,
+    "riskLevel": "NONE",
+    "matchedTerms": [],
+    "decision": "APPROVED",
+    "rulesetVersion": "ip-blocklist@3"
+  },
+  "feeScheduleMeta": {
+    "version": 1,
+    "lastVerified": "2026-01-01"
+  }
+}

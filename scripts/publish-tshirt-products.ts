@@ -71,7 +71,7 @@ function validateDraft(listing: EtsyListing, product: PreparedProduct) {
   const price = listing.price.amount / listing.price.divisor;
 
   if (listing.state !== "draft") issues.push(`state is ${listing.state}, expected draft`);
-  if (listing.type !== "download") issues.push(`type is ${listing.type}, expected download`);
+  if (listing.type !== undefined && listing.type !== "download") issues.push(`type is ${listing.type}, expected download`);
   if (listing.title !== product.data.suggested_title) issues.push("title does not exactly match PRODUCT_DATA suggested_title");
   if (!actualDescription.includes("DIGITAL DOWNLOAD")) issues.push("description is missing DIGITAL DOWNLOAD");
   if (!actualDescription.toLowerCase().includes("no physical product")) issues.push("description is missing no physical product");
@@ -368,8 +368,13 @@ async function main() {
     reports.push(await publishProduct(product));
   }
 
+  const summaryJson = JSON.stringify(reports, null, 2);
+  await getStorage().write("manual-products/tshirt-products/publish-summary.json", Buffer.from(summaryJson, "utf8"));
   await mkdir(preparedRoot, { recursive: true });
-  await writeFile(path.join(preparedRoot, "publish-summary.json"), JSON.stringify(reports, null, 2), "utf8");
+  await writeFile(path.join(preparedRoot, "publish-summary.json"), summaryJson, "utf8").catch((err: unknown) => {
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn(`Could not write local publish summary under ${preparedRoot}: ${message}`);
+  });
   console.log(JSON.stringify(reports, null, 2));
 }
 

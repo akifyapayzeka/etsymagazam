@@ -238,7 +238,6 @@ async function publishProduct(product: PreparedProduct): Promise<PublishReport> 
     taxonomy_id: taxonomyId,
     type: "download",
     tags: product.data.tags,
-    materials: seo.materials,
     is_personalizable: false,
     should_auto_renew: true,
     is_supply: true,

@@ -402,18 +402,18 @@ This is a digital product. No physical item will be mailed to you.
   const tags = [
     "pet sitter binder",
     "dog sitter printable",
-    "pet care instructions",
+    "pet care guide",
     "house sitter binder",
     "pet emergency sheet",
     "dog walker notes",
     "pet boarding binder",
     "pet care checklist",
-    "dog sitting printable",
+    "dog sitting pdf",
     "pet feeding chart",
     "printable pdf",
     "instant download",
     "pet owner printable",
-  ].map((t) => truncate(t, LISTING_LIMITS.maxTagLength));
+  ];
   if (tags.length !== 13) throw new Error(`Expected exactly 13 tags, got ${tags.length}`);
   for (const t of tags) {
     if (t.length > LISTING_LIMITS.maxTagLength) throw new Error(`Tag "${t}" exceeds ${LISTING_LIMITS.maxTagLength} chars`);

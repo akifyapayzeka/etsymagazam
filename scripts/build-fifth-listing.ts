@@ -402,17 +402,17 @@ This is a digital product. No physical item will be mailed to you.
     "halloween party kit",
     "halloween planner",
     "halloween games",
-    "party planner printable",
-    "pumpkin carving sheet",
+    "party planner pdf",
+    "pumpkin carving",
     "halloween trivia",
     "party host checklist",
     "halloween decor list",
-    "trick or treat safety",
+    "trick or treat",
     "fall party printable",
     "printable pdf",
     "instant download",
     "halloween printable",
-  ].map((t) => truncate(t, LISTING_LIMITS.maxTagLength));
+  ];
   if (tags.length !== 13) throw new Error(`Expected exactly 13 tags, got ${tags.length}`);
   for (const t of tags) {
     if (t.length > LISTING_LIMITS.maxTagLength) throw new Error(`Tag "${t}" exceeds ${LISTING_LIMITS.maxTagLength} chars`);

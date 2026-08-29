@@ -413,7 +413,7 @@ This is a digital product. No physical item will be mailed to you.
     "printable pdf",
     "instant download",
     "student printable",
-  ].map((t) => truncate(t, LISTING_LIMITS.maxTagLength));
+  ];
   if (tags.length !== 13) throw new Error(`Expected exactly 13 tags, got ${tags.length}`);
   for (const t of tags) {
     if (t.length > LISTING_LIMITS.maxTagLength) throw new Error(`Tag "${t}" exceeds ${LISTING_LIMITS.maxTagLength} chars`);

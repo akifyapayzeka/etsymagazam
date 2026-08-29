@@ -71,11 +71,22 @@ function truncate(s: string, max: number): string {
   return s.length <= max ? s : s.slice(0, max - 1).trimEnd() + "…";
 }
 
+/**
+ * Etsy tags must contain only plain characters — no ellipsis. A long
+ * AI-generated tag truncated via truncate() (which appends "…") gets
+ * rejected outright by Etsy's createDraftListing with a 400
+ * "invalid_characters" error, which fails the entire listing, not just
+ * that tag. Hard-cut instead, with no added character.
+ */
+function truncateTag(s: string, max: number): string {
+  return s.length <= max ? s : s.slice(0, max).trimEnd();
+}
+
 function sanitizeTags(tags: string[]): string[] {
   const seen = new Set<string>();
   const cleaned: string[] = [];
   for (const raw of tags) {
-    const tag = truncate(raw.trim(), LISTING_LIMITS.maxTagLength);
+    const tag = truncateTag(raw.trim(), LISTING_LIMITS.maxTagLength);
     const key = tag.toLowerCase();
     if (!tag || seen.has(key)) continue;
     seen.add(key);

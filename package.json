@@ -29,7 +29,8 @@
     "pipeline:dry-run": "tsx scripts/run-pipeline-test.ts",
     "publish:manual-products": "tsx scripts/publish-manual-products.ts",
     "qa:tshirt-products": "tsx scripts/qa-tshirt-products.ts",
-    "publish:tshirt-products": "tsx scripts/publish-tshirt-products.ts"
+    "publish:tshirt-products": "tsx scripts/publish-tshirt-products.ts",
+    "publish:homeowner-command-center": "tsx scripts/publish-homeowner-command-center.ts"
   },
   "dependencies": {
     "@etsymagazam/ai": "workspace:*",
@@ -39,6 +40,7 @@
     "@etsymagazam/product-generator": "workspace:*",
     "@etsymagazam/qa": "workspace:*",
     "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1",
     "sharp": "^0.33.5"
   },
   "devDependencies": {

@@ -1,0 +1,37 @@
+{
+  "status": "Draft Ready",
+  "listingTitle": "Home Maintenance Binder Printable, Homeowner Planner, New Home Binder, House Maintenance Log, Fillable PDF",
+  "price": "$9.95",
+  "filesUploaded": [
+    "Homeowner_Command_Center_US_Letter_FILLABLE.pdf",
+    "Homeowner_Command_Center_A4_FILLABLE.pdf",
+    "READ_ME_FIRST.pdf"
+  ],
+  "imagesUploaded": [
+    "01_Run_Your_Home_Like_A_S.jpg",
+    "02_Everything_Important._.jpg",
+    "03_Built_For_New_Homeowne.jpg",
+    "04_Maintenance_Without_Gu.jpg",
+    "05_Repairs_With_Better_Re.jpg",
+    "06_Plan_Projects_With_Con.jpg",
+    "07_Print_It_Or_Type_Into_.jpg",
+    "08_A_Useful_Housewarming_.jpg"
+  ],
+  "tags": [
+    "home maintenance",
+    "homeowner binder",
+    "new home binder",
+    "house maintenance",
+    "home organizer",
+    "home planner",
+    "maintenance log",
+    "home records",
+    "new homeowner gift",
+    "home inventory",
+    "house binder",
+    "home management",
+    "fillable pdf"
+  ],
+  "checks": "PASS",
+  "manualActionRequired": "QA-only local run; no Etsy write attempted."
+}

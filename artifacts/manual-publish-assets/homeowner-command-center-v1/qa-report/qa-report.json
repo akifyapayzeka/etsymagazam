@@ -1,0 +1,129 @@
+{
+  "product": "Homeowner Command Center",
+  "slug": "homeowner-command-center-fillable-pdf-v1",
+  "pdfs": [
+    {
+      "filename": "Homeowner_Command_Center_US_Letter_FILLABLE.pdf",
+      "sizeBytes": 185066,
+      "pages": 29,
+      "form": "AcroForm",
+      "pageSize": "letter (612.00 x 792.00)",
+      "fieldCount": 191
+    },
+    {
+      "filename": "Homeowner_Command_Center_A4_FILLABLE.pdf",
+      "sizeBytes": 192757,
+      "pages": 29,
+      "form": "AcroForm",
+      "pageSize": "A4 (595.28 x 841.89)",
+      "fieldCount": 191
+    },
+    {
+      "filename": "READ_ME_FIRST.pdf",
+      "sizeBytes": 2448,
+      "pages": 1,
+      "form": "none",
+      "pageSize": "letter (612.00 x 792.00)",
+      "fieldCount": 0
+    }
+  ],
+  "images": [
+    {
+      "filename": "01_Run_Your_Home_Like_A_S.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 170145
+    },
+    {
+      "filename": "02_Everything_Important._.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 199174
+    },
+    {
+      "filename": "03_Built_For_New_Homeowne.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 173342
+    },
+    {
+      "filename": "04_Maintenance_Without_Gu.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 196861
+    },
+    {
+      "filename": "05_Repairs_With_Better_Re.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 186328
+    },
+    {
+      "filename": "06_Plan_Projects_With_Con.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 180793
+    },
+    {
+      "filename": "07_Print_It_Or_Type_Into_.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 172051
+    },
+    {
+      "filename": "08_A_Useful_Housewarming_.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 195518
+    }
+  ],
+  "titleLength": 106,
+  "tags": [
+    "home maintenance",
+    "homeowner binder",
+    "new home binder",
+    "house maintenance",
+    "home organizer",
+    "home planner",
+    "maintenance log",
+    "home records",
+    "new homeowner gift",
+    "home inventory",
+    "house binder",
+    "home management",
+    "fillable pdf"
+  ],
+  "priceUsd": 9.95,
+  "checks": {
+    "productNameCorrect": true,
+    "digitalOnly": true,
+    "noShipping": true,
+    "pageCountCorrect": true,
+    "a4Included": true,
+    "usLetterIncluded": true,
+    "fillablePdfIncluded": true,
+    "productFilesOpen": true,
+    "imagesMatchProduct": true,
+    "noOtherProductImages": true,
+    "noThirdPartyBrandOrLogoSeen": true,
+    "descriptionMatchesProduct": true,
+    "tagCountCorrect": true,
+    "titleOptimized": true,
+    "priceAround995": true,
+    "filesDownloadable": true,
+    "noVariations": true,
+    "personalizationOff": true,
+    "mainImageQuality": true,
+    "copyProofread": true
+  },
+  "issues": [],
+  "passed": true
+}

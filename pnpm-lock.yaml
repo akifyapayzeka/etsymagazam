@@ -29,6 +29,9 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
+      pdf-lib:
+        specifier: ^1.17.1
+        version: 1.17.1
       sharp:
         specifier: ^0.33.5
         version: 0.33.5

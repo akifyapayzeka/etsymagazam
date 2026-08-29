@@ -160,7 +160,7 @@ export async function publishListing(input: PublishInput): Promise<PublishResult
       return {
         status: existing.state === "ACTIVE" ? "published_active" : "published_draft",
         reason: "Already published in a previous run (idempotent replay) — no new Etsy listing was created.",
-        listingId: existing.id,
+        listingId: existing.etsyListingId ?? undefined,
       };
     }
   }
@@ -261,7 +261,10 @@ export async function publishListing(input: PublishInput): Promise<PublishResult
     return {
       status: finalState === "active" ? "published_active" : "published_draft",
       reason: finalState === "active" ? "Listing created and activated on Etsy." : "Listing created as a draft on Etsy (AUTO_PUBLISH=false).",
-      listingId: listingRow.id,
+      // The REAL Etsy listing_id (numeric, usable at etsy.com/listing/<id>
+      // or in Shop Manager) — not listingRow.id, which is this system's own
+      // internal database row UUID and useless outside this codebase.
+      listingId: etsyListingId,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

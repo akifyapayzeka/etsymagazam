@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
@@ -51,6 +51,32 @@ function localFileType(filename: string): string {
   return path.extname(filename).slice(1).toUpperCase();
 }
 
+async function pathExists(filePath: string): Promise<boolean> {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getSourceRoots(): Promise<{ downloadRoot: string; imageRoot: string }> {
+  const incomingDownloadRoot = homeownerInputRoot;
+  const incomingImageRoot = path.join(homeownerInputRoot, "Listing_Images");
+  if (await pathExists(path.join(incomingDownloadRoot, homeownerBuyerFiles[0]))) {
+    return { downloadRoot: incomingDownloadRoot, imageRoot: incomingImageRoot };
+  }
+  return {
+    downloadRoot: path.join(homeownerPreparedRoot, "downloads"),
+    imageRoot: path.join(homeownerPreparedRoot, "images", "listing_images"),
+  };
+}
+
+async function copyIfDifferent(sourcePath: string, outputPath: string) {
+  if (path.resolve(sourcePath) === path.resolve(outputPath)) return;
+  await copyFile(sourcePath, outputPath);
+}
+
 function describePageSize(width: number, height: number): string {
   const [shortSide, longSide] = [width, height].sort((a, b) => a - b);
   if (Math.abs(shortSide - 612) < 2 && Math.abs(longSide - 792) < 2) return `letter (${width.toFixed(2)} x ${height.toFixed(2)})`;
@@ -77,6 +103,7 @@ async function qaInputs() {
   const issues: string[] = [];
   const pdfs: PdfInfo[] = [];
   const images: Array<{ filename: string; width: number; height: number; format?: string; sizeBytes: number }> = [];
+  const sourceRoots = await getSourceRoots();
 
   if (homeownerTitle.length > LISTING_LIMITS.maxTitleLength) issues.push(`Title exceeds ${LISTING_LIMITS.maxTitleLength} characters.`);
   if (homeownerTags.length !== LISTING_LIMITS.maxTags) issues.push(`Expected 13 tags, found ${homeownerTags.length}.`);
@@ -91,7 +118,7 @@ async function qaInputs() {
 
   let totalDigitalFileBytes = 0;
   for (const filename of homeownerBuyerFiles) {
-    const filePath = path.join(homeownerInputRoot, filename);
+    const filePath = path.join(sourceRoots.downloadRoot, filename);
     const fileStat = await stat(filePath);
     totalDigitalFileBytes += fileStat.size;
     if (fileStat.size > LISTING_LIMITS.maxDigitalFileSizeBytes) issues.push(`${filename} exceeds Etsy's 20MB per-file limit.`);
@@ -110,7 +137,7 @@ async function qaInputs() {
   if (totalDigitalFileBytes > LISTING_LIMITS.maxDigitalFilesTotalSizeBytes) issues.push("Total buyer files exceed Etsy total digital-file limit.");
 
   for (const filename of homeownerImageFiles) {
-    const filePath = path.join(homeownerInputRoot, "Listing_Images", filename);
+    const filePath = path.join(sourceRoots.imageRoot, filename);
     const fileStat = await stat(filePath);
     const meta = await sharp(filePath).metadata();
     if (meta.format !== "jpeg") issues.push(`${filename} is ${meta.format}, expected JPEG.`);
@@ -162,15 +189,16 @@ async function prepareAssets() {
   const imageOutput = path.join(homeownerPreparedRoot, "images", "listing_images");
   const downloadOutput = path.join(homeownerPreparedRoot, "downloads");
   const listingOutput = path.join(homeownerPreparedRoot, "listing-data");
+  const sourceRoots = await getSourceRoots();
   await mkdir(imageOutput, { recursive: true });
   await mkdir(downloadOutput, { recursive: true });
   await mkdir(listingOutput, { recursive: true });
 
   for (const filename of homeownerBuyerFiles) {
-    await copyFile(path.join(homeownerInputRoot, filename), path.join(downloadOutput, filename));
+    await copyIfDifferent(path.join(sourceRoots.downloadRoot, filename), path.join(downloadOutput, filename));
   }
   for (const filename of homeownerImageFiles) {
-    await copyFile(path.join(homeownerInputRoot, "Listing_Images", filename), path.join(imageOutput, filename));
+    await copyIfDifferent(path.join(sourceRoots.imageRoot, filename), path.join(imageOutput, filename));
   }
   await writeFile(
     path.join(listingOutput, "PRODUCT_DATA.json"),

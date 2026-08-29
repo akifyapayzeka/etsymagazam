@@ -1,0 +1,30 @@
+{
+  "qaReport": {
+    "designScore": 100,
+    "technicalScore": 92,
+    "seoScore": 100,
+    "originalityScore": 100,
+    "policySafetyScore": 100,
+    "overallScore": 98,
+    "passed": true,
+    "issues": [
+      {
+        "code": "LOW_CONTRAST",
+        "severity": "warning",
+        "message": "design PNG (transparent): low tonal variance (stdev 10.4) — text may be hard to read against the background.",
+        "location": "design PNG (transparent)"
+      }
+    ]
+  },
+  "ipCheck": {
+    "riskScore": 0,
+    "riskLevel": "NONE",
+    "matchedTerms": [],
+    "decision": "APPROVED",
+    "rulesetVersion": "ip-blocklist@3"
+  },
+  "feeScheduleMeta": {
+    "version": 1,
+    "lastVerified": "2026-01-01"
+  }
+}

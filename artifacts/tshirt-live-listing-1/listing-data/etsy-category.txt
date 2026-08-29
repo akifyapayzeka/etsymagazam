@@ -1,0 +1,3 @@
+shirt_design_printable
+
+(This is a category HINT for the human publisher, not a numeric taxonomy_id — the autopilot system never guesses one; see docs/ETSY_SETUP.md step 6. In Etsy's listing editor, type a description of the actual product — e.g. "t-shirt design png" or "sublimation design" — into the category search field and Etsy will suggest real, current categories live.)

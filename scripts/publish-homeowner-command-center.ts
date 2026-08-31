@@ -179,8 +179,8 @@ async function qaInputs() {
     passed: issues.length === 0,
   };
 
-  await mkdir(path.join(homeownerPreparedRoot, "qa-report"), { recursive: true });
-  await writeFile(path.join(homeownerPreparedRoot, "qa-report", "qa-report.json"), JSON.stringify(qaReport, null, 2), "utf8");
+  await mkdir(path.join(homeownerPreparedRoot, "qa-report"), { recursive: true }).catch(() => undefined);
+  await writeFile(path.join(homeownerPreparedRoot, "qa-report", "qa-report.json"), JSON.stringify(qaReport, null, 2), "utf8").catch(() => undefined);
   if (issues.length > 0) throw new Error(`Homeowner QA failed: ${issues.join("; ")}`);
   return qaReport;
 }
@@ -204,7 +204,7 @@ async function prepareAssets() {
     path.join(listingOutput, "PRODUCT_DATA.json"),
     JSON.stringify({ title: homeownerTitle, description: homeownerDescription, tags: homeownerTags, priceUsd: 9.95 }, null, 2),
     "utf8",
-  );
+  ).catch(() => undefined);
 }
 
 async function mirrorAsset(localPath: string, storagePath: string): Promise<string> {
@@ -232,7 +232,7 @@ function validateDraft(listing: EtsyListing, priceInShopCurrency: number, shopCu
 }
 
 async function publish(): Promise<PublishReport> {
-  await qaInputs();
+  const qaReport = await qaInputs();
   await prepareAssets();
 
   if (process.argv.includes("--qa-only")) {
@@ -356,13 +356,21 @@ async function publish(): Promise<PublishReport> {
         mockups: listingImages,
         metadataJson: { manualPublish: true, source: "Homeowner_Command_Center_ETSY_READY", slug: homeownerSlug },
         seoJson: seo,
-        qaReportJson: JSON.parse(await readFile(path.join(homeownerPreparedRoot, "qa-report", "qa-report.json"), "utf8")) as object,
+        qaReportJson: qaReport,
       },
     });
   } else {
     version = await prisma.productVersion.update({
       where: { id: version.id },
-      data: { sourceDir, customerFiles, listingImages, mockups: listingImages, metadataJson: { manualPublish: true, source: "Homeowner_Command_Center_ETSY_READY", slug: homeownerSlug }, seoJson: seo },
+      data: {
+        sourceDir,
+        customerFiles,
+        listingImages,
+        mockups: listingImages,
+        metadataJson: { manualPublish: true, source: "Homeowner_Command_Center_ETSY_READY", slug: homeownerSlug },
+        seoJson: seo,
+        qaReportJson: qaReport,
+      },
     });
   }
   await prisma.product.update({ where: { id: product.id }, data: { currentVersionId: version.id } });

@@ -30,6 +30,8 @@
     "publish:manual-products": "tsx scripts/publish-manual-products.ts",
     "qa:tshirt-products": "tsx scripts/qa-tshirt-products.ts",
     "publish:tshirt-products": "tsx scripts/publish-tshirt-products.ts",
+    "build:generated-tshirt-wave": "tsx scripts/build-generated-tshirt-wave.ts",
+    "publish:generated-tshirt-wave": "tsx scripts/publish-generated-tshirt-wave.ts",
     "publish:homeowner-command-center": "tsx scripts/publish-homeowner-command-center.ts"
   },
   "dependencies": {

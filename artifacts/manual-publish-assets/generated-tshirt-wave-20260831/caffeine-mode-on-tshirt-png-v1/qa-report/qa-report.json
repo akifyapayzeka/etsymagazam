@@ -1,0 +1,87 @@
+{
+  "slug": "caffeine-mode-on-tshirt-png-v1",
+  "productName": "Caffeine Mode On T-Shirt PNG",
+  "buyerZip": {
+    "filename": "06_CAFFEINE_MODE_ON_BUYER_DOWNLOAD.zip",
+    "sizeBytes": 197001,
+    "entries": [
+      "caffeine-mode-on-tshirt-design-4500x5400.png",
+      "instructions.txt",
+      "license.txt"
+    ],
+    "png": {
+      "filename": "caffeine-mode-on-tshirt-design-4500x5400.png",
+      "width": 4500,
+      "height": 5400,
+      "hasAlpha": true,
+      "hasTransparentPixels": true,
+      "density": 300
+    }
+  },
+  "listingImages": [
+    {
+      "filename": "01_MAIN_MOCKUP.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 127348
+    },
+    {
+      "filename": "02_ARTWORK_DETAILS.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 191763
+    },
+    {
+      "filename": "03_TRANSPARENT_PNG.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 122186
+    },
+    {
+      "filename": "04_LIGHT_TEE_MOCKUP.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 75486
+    },
+    {
+      "filename": "05_HOW_IT_WORKS.jpg",
+      "width": 2000,
+      "height": 1600,
+      "format": "jpeg",
+      "sizeBytes": 114428
+    }
+  ],
+  "titleLength": 84,
+  "tagCount": 13,
+  "tags": [
+    "coffee png",
+    "caffeine png",
+    "coffee shirt png",
+    "tshirt design png",
+    "sublimation png",
+    "dtf design",
+    "coffee lover gift",
+    "barista png",
+    "instant download",
+    "png design file",
+    "shirt design",
+    "coffee graphic",
+    "digital download"
+  ],
+  "priceTry": 200,
+  "mockupSource": {
+    "researchedFreeSite": "Mockey.ai free t-shirt mockup generator was identified during current web research.",
+    "productionMethod": "Final mockups were generated locally from the actual transparent PNG to keep the buyer file and listing images exactly matched."
+  },
+  "trademarkReview": {
+    "phrase": "Caffeine Mode On",
+    "decision": "APPROVED_FOR_PUBLISH",
+    "note": "Current broad web/trademark-oriented search found marketplace phrase use, but no obvious active exact apparel trademark conflict."
+  },
+  "issues": [],
+  "passed": true
+}
